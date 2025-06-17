@@ -1,12 +1,17 @@
+import { useScrollReveal } from '../../../hooks/use-scroll-reveal';
+
 const ProcessSection = () => {
+  const headingRef = useScrollReveal();
+  const stepsRef = useScrollReveal({ delay: 150 });
+
   return (
     <section id="process" className="py-20 md:py-28 bg-neutral-50">
         <div className="container mx-auto px-6">
-            <div className="text-center max-w-3xl mx-auto mb-16">
+            <div ref={headingRef} className="text-center max-w-3xl mx-auto mb-16 reveal">
                 <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">Unser Weg zum gemeinsamen Erfolg</h2>
                 <p className="text-slate-600 text-lg">Unser Prozess ist transparent, effizient und vollständig auf Ihre Ziele ausgerichtet.</p>
             </div>
-            <div className="relative max-w-5xl mx-auto">
+            <div ref={stepsRef} className="relative max-w-5xl mx-auto reveal">
                 <div className="hidden md:block absolute top-8 left-0 w-full h-px bg-slate-200"></div>
                 <div className="grid md:grid-cols-4 gap-y-12 md:gap-x-12 relative">
                     <div className="text-center">

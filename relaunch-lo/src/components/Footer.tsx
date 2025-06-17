@@ -1,16 +1,21 @@
+import { useScrollReveal } from '../hooks/use-scroll-reveal';
+
 const Footer = () => {
+  const mainRef = useScrollReveal();
+  const linksRef = useScrollReveal({ delay: 150 });
+
   return (
     <footer id="contact" className="bg-neutral-900 text-white pt-16 pb-8">
         <div className="container mx-auto px-6">
             <div className="grid md:grid-cols-12 gap-8">
-                <div className="md:col-span-5">
+                <div ref={mainRef} className="md:col-span-5 reveal">
                     <a href="#" className="flex items-center space-x-2 mb-4">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-brand-600"><path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path><path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path><path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
                         <span className="font-bold text-xl text-white">LeadGen Pro</span>
                     </a>
                     <p className="text-slate-400 mb-6 max-w-sm">Ihr Partner für Conversion-optimiertes Marketing und Webentwicklung.</p>
                 </div>
-                <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
+                <div ref={linksRef} className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8 reveal">
                     <div>
                         <h4 className="font-semibold text-white mb-4">Leistungen</h4>
                         <ul className="space-y-2">

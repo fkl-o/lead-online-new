@@ -1,9 +1,12 @@
 import { Zap } from 'lucide-react';
+import { useScrollReveal } from '../../../hooks/use-scroll-reveal';
 
 const CallToActionSection = () => {
+  const revealRef = useScrollReveal();
+
   return (
     <section className="py-20 md:py-28 bg-white">
-         <div className="container mx-auto px-6 text-center">
+         <div ref={revealRef} className="container mx-auto px-6 text-center reveal">
             <Zap className="w-12 h-12 text-brand-600 mb-4 mx-auto" />
             <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">Bereit, den nächsten Schritt zu gehen?</h2>
             <p className="text-slate-600 text-lg max-w-2xl mx-auto mb-8">Lassen Sie uns gemeinsam herausfinden, wie wir Ihr Unternehmen voranbringen können. Starten Sie jetzt mit einer unserer kostenlosen Analysen.</p>
