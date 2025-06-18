@@ -2,9 +2,9 @@ import { ArrowDown } from 'lucide-react';
 import { useScrollReveal } from '../../../hooks/use-scroll-reveal';
 
 const HeroSection = () => {
-  const titleRef = useScrollReveal();
-  const descRef = useScrollReveal({ delay: 150 });
-  const btnRef = useScrollReveal({ delay: 300 });
+  const titleRef = useScrollReveal<HTMLHeadingElement>();
+  const descRef = useScrollReveal<HTMLParagraphElement>({ delay: 150 });
+  const btnRef = useScrollReveal<HTMLAnchorElement>({ delay: 300 });
 
   return (
     <section className="pt-28 pb-20 md:pt-40 md:pb-32 text-center relative overflow-hidden bg-white">

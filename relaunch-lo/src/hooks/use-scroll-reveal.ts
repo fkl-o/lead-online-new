@@ -1,39 +1,26 @@
 import { useEffect, useRef } from 'react';
 
-interface UseScrollRevealOptions {
-  threshold?: number;
-  delay?: number;
-}
-
-export const useScrollReveal = (options: UseScrollRevealOptions = {}) => {
-  const { threshold = 0.1, delay = 0 } = options;
-  const ref = useRef<HTMLDivElement>(null);
+export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(options?: { delay?: number }) {
+  const ref = useRef<T | null>(null);
 
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setTimeout(() => {
-              entry.target.classList.add('visible');
-            }, delay);
-          }
-        });
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add('revealed');
+          observer.unobserve(el);
+        }
       },
-      { threshold }
+      { threshold: 0.1 }
     );
 
-    const currentRef = ref.current;
-    if (currentRef) {
-      observer.observe(currentRef);
-    }
+    observer.observe(el);
 
-    return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
-    };
-  }, [threshold, delay]);
+    return () => observer.disconnect();
+  }, [options?.delay]);
 
   return ref;
-};
+}
