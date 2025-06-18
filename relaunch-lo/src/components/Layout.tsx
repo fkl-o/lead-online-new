@@ -1,18 +1,26 @@
-// src/components/Layout.jsx
-import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { revealInit } from "../lib/reveal-init";
 import Header from "./Header";
 import Footer from "./Footer";
-import "../lib/reveal-init"; // Import the reveal script
+import LoginModal from "./modals/LoginModal";
 
 const Layout = () => {
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    revealInit();
+  }, [location.pathname]); // <- neu: Observer neu bei Route-Änderung
+
   return (
     <>
-      <Header />
+      <Header onLoginClick={() => setLoginModalOpen(true)} />
       <main>
-        <Outlet /> {/* Hier werden die jeweiligen Seiteninhalte geladen */}
+        <Outlet />
       </main>
       <Footer />
+      <LoginModal open={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
     </>
   );
 };

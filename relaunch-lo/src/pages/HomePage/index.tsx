@@ -16,16 +16,31 @@ const HomePage = () => {
     <>
       <Helmet>
         <title>LeadGen Pro | Ihre Digitalagentur für Wachstum</title>
-        <meta name="description" content="Als Ihr Partner für Webentwicklung, Marketing Automation und Digitalisierung schaffen wir nachhaltige Wettbewerbsvorteile und messbare Erfolge." />
+        <meta 
+          name="description" 
+          content="Als Ihr Partner für Webentwicklung, Marketing Automation und Digitalisierung schaffen wir nachhaltige Wettbewerbsvorteile und messbare Erfolge." 
+        />
       </Helmet>
       
       <HeroSection />
       <ServicesSection onOpenModal={setActiveModal} /> 
       <TrustSection />
       <ProcessSection />
-      <CallToActionSection />      {activeModal === 'website' && <WebsiteModal open={true} onClose={() => setActiveModal(null)} />}
-      {activeModal === 'automation' && <AutomationModal onClose={() => setActiveModal(null)} />}
-      {activeModal === 'digitalization' && <DigitalizationModal onClose={() => setActiveModal(null)} />}
+      <CallToActionSection />
+
+      {/* ✅ Einheitlich: immer gerendert, open steuert Anzeige */}
+      <WebsiteModal 
+        open={activeModal === 'website'} 
+        onClose={() => setActiveModal(null)} 
+      />
+      <AutomationModal 
+        open={activeModal === 'automation'} 
+        onClose={() => setActiveModal(null)} 
+      />
+      <DigitalizationModal 
+        open={activeModal === 'digitalization'} 
+        onClose={() => setActiveModal(null)} 
+      />
     </>
   );
 };

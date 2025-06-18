@@ -1,34 +1,54 @@
-import { useState } from 'react';
-import { Menu } from 'lucide-react';
-import { Button } from './ui/button';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { Menu, Mail, LogIn } from "lucide-react";
 
-const Header = () => {
+interface HeaderProps {
+  onLoginClick: () => void;
+}
+
+const Header = ({ onLoginClick }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-neutral-200">
-      <div className="container mx-auto px-6 py-4 flex justify-between items-center">        <a href="#" className="flex items-center space-x-2">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        
+        {/* Logo */}
+        <Link to="/" className="flex items-center space-x-3">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-brand-600">
             <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
             <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
             <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
           </svg>
           <span className="font-bold text-xl text-gray-900">LeadGen Pro</span>
-        </a>
+        </Link>
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          <a href="#services" className="text-slate-600 hover:text-slate-900 transition-colors">Webentwicklung</a>
+          <Link to="/webentwicklung" className="text-slate-600 hover:text-slate-900 transition-colors">Webentwicklung</Link>
           <a href="#services" className="text-slate-600 hover:text-slate-900 transition-colors">Marketing Automation</a>
           <a href="#services" className="text-slate-600 hover:text-slate-900 transition-colors">Digitalisierung</a>
-        </nav>        {/* Desktop CTA */}
-        <div className="hidden md:block">
-          <Button asChild className="bg-brand-600 hover:bg-brand-700 text-white font-semibold">
-            <a href="#contact">Kontakt</a>
+        </nav>
+
+        {/* Desktop CTA */}
+        <div className="hidden md:flex space-x-4">
+          <Button asChild className="bg-brand-600 hover:bg-brand-700 text-white font-semibold flex items-center space-x-2">
+            <a href="#contact">
+              <Mail className="w-4 h-4" />
+              <span>Kontakt</span>
+            </a>
+          </Button>
+          <Button
+            className="bg-black hover:bg-gray-800 text-white font-semibold flex items-center space-x-2"
+            onClick={onLoginClick}
+          >
+            <LogIn className="w-4 h-4" />
+            <span>Login</span>
           </Button>
         </div>
-        
+
         {/* Mobile Menu Button */}
         <div className="md:hidden">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -39,13 +59,13 @@ const Header = () => {
             </SheetTrigger>
             <SheetContent side="right" className="bg-white">
               <nav className="flex flex-col items-center space-y-4 p-6">
-                <a 
-                  href="#services" 
+                <Link 
+                  to="/webentwicklung" 
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-slate-700 hover:text-slate-900 transition-colors w-full text-center py-2"
                 >
                   Webentwicklung
-                </a>
+                </Link>
                 <a 
                   href="#services" 
                   onClick={() => setMobileMenuOpen(false)}
@@ -59,8 +79,25 @@ const Header = () => {
                   className="text-slate-700 hover:text-slate-900 transition-colors w-full text-center py-2"
                 >
                   Digitalisierung
-                </a>                <Button asChild className="mt-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold w-full">
-                  <a href="#contact" onClick={() => setMobileMenuOpen(false)}>Kontakt</a>
+                </a>
+                <Button 
+                  asChild 
+                  className="bg-brand-600 hover:bg-brand-700 text-white font-semibold flex items-center space-x-2 w-full justify-center"
+                >
+                  <a href="#contact">
+                    <Mail className="w-4 h-4" />
+                    <span>Kontakt</span>
+                  </a>
+                </Button>
+                <Button
+                  className="bg-black hover:bg-gray-800 text-white font-semibold flex items-center space-x-2 w-full justify-center"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onLoginClick();
+                  }}
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Login</span>
                 </Button>
               </nav>
             </SheetContent>

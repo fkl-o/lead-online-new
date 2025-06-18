@@ -1,18 +1,18 @@
-// This script initializes the intersection observer for reveal animations
-// It's similar to what was in the HTML prototype
+// src/lib/reveal-init.ts
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Intersection Observer for reveal animations
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
-    });
-  }, { threshold: 0.1 });
-  
-  // Observe all elements with the .reveal class
+export function revealInit() {
+  // Intersection Observer für .reveal-Elemente
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
+
+  // Alle .reveal-Elemente beobachten
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-});
-
-export {};
+}
