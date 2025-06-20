@@ -10,6 +10,9 @@ import './index.css';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import WebentwicklungLayout from './pages/Webentwicklung/WebentwicklungLayout';
+import MarketingAutomationLayout from './pages/MarketingAutomation/MarketingAutomationLayout';
+import DigitalizationLayout from './pages/Digitalization/DigitalizationLayout';
+import LoginPage from './pages/LoginPage';
 
 const router = createBrowserRouter([
   {
@@ -23,8 +26,17 @@ const router = createBrowserRouter([
         path: "webentwicklung",
         element: <WebentwicklungLayout />,
       },
+      {
+        path: "marketing-automation",
+        element: <MarketingAutomationLayout />,
+      },
+      {
+        path: "digitalization",
+        element: <DigitalizationLayout />,
+      }
     ],
   },
+  { path: '/login', element: <LoginPage /> },
 ]);
 
 const rootElement = document.getElementById('root');

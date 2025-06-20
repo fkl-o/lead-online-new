@@ -13,4 +13,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: "0.0.0.0",      // ← wichtig für Render
+    port: 3000            // ← Render erwartet oft Port 3000
+  },
+  preview: {
+    host: "0.0.0.0",      // ← auch für "vite preview"
+    port: 3000
+  }
 })

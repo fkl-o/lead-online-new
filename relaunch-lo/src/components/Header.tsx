@@ -4,11 +4,7 @@ import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { Menu, Mail, LogIn } from "lucide-react";
 
-interface HeaderProps {
-  onLoginClick: () => void;
-}
-
-const Header = ({ onLoginClick }: HeaderProps) => {
+const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -28,8 +24,8 @@ const Header = ({ onLoginClick }: HeaderProps) => {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
           <Link to="/webentwicklung" className="text-slate-600 hover:text-slate-900 transition-colors">Webentwicklung</Link>
-          <a href="#services" className="text-slate-600 hover:text-slate-900 transition-colors">Marketing Automation</a>
-          <a href="#services" className="text-slate-600 hover:text-slate-900 transition-colors">Digitalisierung</a>
+          <Link to="/marketing-automation" className="text-slate-600 hover:text-slate-900 transition-colors">Marketing Automation</Link>
+          <Link to="/digitalization" className="text-slate-600 hover:text-slate-900 transition-colors">Digitalisierung</Link>
         </nav>
 
         {/* Desktop CTA */}
@@ -40,12 +36,11 @@ const Header = ({ onLoginClick }: HeaderProps) => {
               <span>Kontakt</span>
             </a>
           </Button>
-          <Button
-            className="bg-black hover:bg-gray-800 text-white font-semibold flex items-center space-x-2"
-            onClick={onLoginClick}
-          >
-            <LogIn className="w-4 h-4" />
-            <span>Login</span>
+          <Button asChild className="bg-black hover:bg-gray-800 text-white font-semibold flex items-center space-x-2">
+            <Link to="/login">
+              <LogIn className="w-4 h-4" />
+              <span>Login</span>
+            </Link>
           </Button>
         </div>
 
@@ -59,27 +54,27 @@ const Header = ({ onLoginClick }: HeaderProps) => {
             </SheetTrigger>
             <SheetContent side="right" className="bg-white">
               <nav className="flex flex-col items-center space-y-4 p-6">
-                <Link 
-                  to="/webentwicklung" 
+                <Link
+                  to="/webentwicklung"
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-slate-700 hover:text-slate-900 transition-colors w-full text-center py-2"
                 >
                   Webentwicklung
                 </Link>
-                <a 
-                  href="#services" 
+                <Link
+                  to="/marketing-automation"
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-slate-700 hover:text-slate-900 transition-colors w-full text-center py-2"
                 >
                   Marketing Automation
-                </a>
-                <a 
-                  href="#services" 
+                </Link>
+                <Link
+                  to="/digitalization"
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-slate-700 hover:text-slate-900 transition-colors w-full text-center py-2"
                 >
                   Digitalisierung
-                </a>
+                </Link>
                 <Button 
                   asChild 
                   className="bg-brand-600 hover:bg-brand-700 text-white font-semibold flex items-center space-x-2 w-full justify-center"
@@ -89,15 +84,11 @@ const Header = ({ onLoginClick }: HeaderProps) => {
                     <span>Kontakt</span>
                   </a>
                 </Button>
-                <Button
-                  className="bg-black hover:bg-gray-800 text-white font-semibold flex items-center space-x-2 w-full justify-center"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onLoginClick();
-                  }}
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span>Login</span>
+                <Button asChild className="bg-black hover:bg-gray-800 text-white font-semibold flex items-center space-x-2 w-full justify-center">
+                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                    <LogIn className="w-4 h-4" />
+                    <span>Login</span>
+                  </Link>
                 </Button>
               </nav>
             </SheetContent>
