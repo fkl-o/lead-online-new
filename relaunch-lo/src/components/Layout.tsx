@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { revealInit } from "../lib/reveal-init";
 import Header from "./Header";
 import Footer from "./Footer";
+import { Helmet } from "react-helmet-async"; // ✅ Import hinzugefügt
 
 const Layout = () => {
   const location = useLocation();
@@ -10,10 +11,14 @@ const Layout = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     revealInit();
-  }, [location.pathname]); // <- neu: Observer neu bei Route-Änderung
+  }, [location.pathname]);
 
   return (
     <>
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+
       <Header />
       <main>
         <Outlet />
