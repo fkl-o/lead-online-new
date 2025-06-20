@@ -3,13 +3,17 @@ import BenefitsSection from "./components/BenefitsSection";
 import ServicesSection from "./components/ServicesSection";
 import CtaSection from "./components/CtaSection";
 
-const WebentwicklungPage = () => {
+type WebentwicklungPageProps = {
+  onOpenModal: (modalName: string) => void;
+};
+
+const WebentwicklungPage = ({ onOpenModal }: WebentwicklungPageProps) => {
   return (
     <>
       <HeroSection />
       <ServicesSection />
       <BenefitsSection />
-      <CtaSection />
+      <CtaSection onOpenModal={onOpenModal} />
     </>
   );
 };

@@ -5,22 +5,22 @@ const benefits = [
   {
     icon: TrendingUp,
     title: "Mehr Umsatz & Wachstum",
-    description: "Eine moderne Website ist ein starker Vertriebskanal. Durch optimierte User Experience und gezielte Conversion-Pfade verwandeln wir Besucher in zahlende Kunden."
+    description: "Eine moderne Website ist Ihr stärkster digitaler Vertriebskanal. Wir optimieren User Experience & Conversion-Pfade – so wird aus Traffic messbarer Umsatz."
   },
   {
     icon: Users,
     title: "Höhere Nutzerbindung",
-    description: "Wir schaffen intuitive und ansprechende digitale Erlebnisse, die Nutzer begeistern und dazu motivieren, immer wieder zurückzukehren."
+    description: "Wir entwickeln Erlebnisse, die begeistern und Besucher zu wiederkehrenden Kunden machen. Intuitive Bedienung schafft Vertrauen und Loyalität."
   },
   {
     icon: Zap,
     title: "Schnellere Performance",
-    description: "Ladezeiten sind ein entscheidender Erfolgsfaktor. Unsere Webanwendungen sind für maximale Geschwindigkeit optimiert, was das Nutzererlebnis und Ihr SEO-Ranking verbessert."
+    description: "Ladezeiten sind Umsatzkiller. Unsere Lösungen sind radikal schnell und pushen Ihr Ranking sowie die Conversion-Rate nachhaltig."
   },
   {
     icon: ShieldCheck,
     title: "Sicherheit & Stabilität",
-    description: "Wir bauen auf bewährte Technologien und robuste Architekturen, um die Sicherheit Ihrer Daten zu gewährleisten und einen zuverlässigen Betrieb sicherzustellen."
+    description: "Modernste Technologien & solide Architektur garantieren Datensicherheit, Ausfallschutz und eine Plattform, auf die Sie sich verlassen können."
   }
 ];
 
@@ -29,24 +29,41 @@ const BenefitsSection = () => {
   const benefitsRef = useScrollReveal({ delay: 150 });
 
   return (
-    <section id="benefits" className="py-20 md:py-28 bg-white">
+    <section id="benefits" className="py-24 md:py-32 bg-gradient-to-b from-white to-neutral-50">
       <div className="container mx-auto px-6">
-        <div ref={headingRef} className="text-center max-w-3xl mx-auto mb-16 reveal">
-          <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">Ihr Nutzen, unser Antrieb</h2>
-          <p className="text-slate-600 text-lg">Wir übersetzen Technologie in messbaren Geschäftserfolg. Das sind die Vorteile, die Sie von einer Zusammenarbeit mit uns erwarten können.</p>
+        <div ref={headingRef} className="text-center max-w-3xl mx-auto mb-20 reveal">
+          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
+            Ihr Nutzen auf einen Blick
+          </h2>
+          <p className="text-slate-600 text-lg md:text-xl">
+            Technologie, die sichtbar wirkt: mehr Reichweite, mehr Leads, mehr Umsatz.
+          </p>
         </div>
-        <div ref={benefitsRef} className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto reveal">
+
+        <div
+          ref={benefitsRef}
+          className="grid sm:grid-cols-2 lg:grid-cols-2 gap-10 max-w-5xl mx-auto reveal"
+        >
           {benefits.map((benefit, index) => (
-            <div key={index} className="flex items-start space-x-6 p-6">
-              <div className="flex-shrink-0">
-                <div className="w-14 h-14 rounded-full bg-brand-600/10 flex items-center justify-center">
-                  <benefit.icon className="w-8 h-8 text-brand-600" />
-                </div>
+            <div
+              key={index}
+              className="group relative overflow-hidden bg-white border border-gray-100 rounded-3xl p-10 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
+            >
+              {/* Gradient Accent */}
+              <div className="absolute -top-6 -left-6 w-24 h-24 bg-gradient-to-br from-secondary-100 to-secondary-200 rounded-full opacity-20 blur-2xl group-hover:scale-110 transition-transform" />
+              
+              {/* Icon */}
+              <div className="relative z-10 flex items-center justify-center w-16 h-16 rounded-xl bg-secondary-600/10 mb-6 group-hover:scale-105 transition">
+                <benefit.icon className="w-8 h-8 text-secondary-600" />
               </div>
-              <div>
-                <h3 className="font-bold text-xl text-gray-900 mb-2">{benefit.title}</h3>
-                <p className="text-slate-600">{benefit.description}</p>
-              </div>
+
+              {/* Title & Description */}
+              <h3 className="relative z-10 font-bold text-2xl text-neutral-900 mb-3">
+                {benefit.title}
+              </h3>
+              <p className="relative z-10 text-slate-600 leading-relaxed">
+                {benefit.description}
+              </p>
             </div>
           ))}
         </div>

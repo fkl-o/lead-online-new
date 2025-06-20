@@ -9,7 +9,7 @@ import './index.css';
 // Die Importpfade benötigen keine Endung mehr, Vite/TS findet die .tsx-Dateien
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
-import WebentwicklungPage from './pages/Webentwicklung';
+import WebentwicklungLayout from './pages/Webentwicklung/WebentwicklungLayout';
 
 const router = createBrowserRouter([
   {
@@ -19,10 +19,9 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
-      },
-      {
+      },      {
         path: "webentwicklung",
-        element: <WebentwicklungPage />,
+        element: <WebentwicklungLayout />,
       },
     ],
   },
