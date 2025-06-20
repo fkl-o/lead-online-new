@@ -3,8 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import MarketingAutomationPage from './index';
 import AutomationModal from '../../components/modals/AutomationModal';
 
-type MarketingAutomationLayoutProps = {};
-
 const MarketingAutomationLayout = () => {
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
