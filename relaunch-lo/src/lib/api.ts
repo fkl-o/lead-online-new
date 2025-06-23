@@ -1,6 +1,6 @@
 // API Base Configuration
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://ihr-backend.onrender.com/api'  // Später durch echte URL ersetzen
+  ? 'https://relaunch-lo-backend.onrender.com/api'
   : 'http://localhost:5000/api';
 
 // Types

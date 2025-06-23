@@ -46,12 +46,10 @@ app.use(helmet());
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
+    if (!origin) return callback(null, true);    const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
       'http://localhost:5173',
       'http://localhost:3000',
-      'https://ihr-frontend.onrender.com' // Ersetzen Sie durch Ihre Frontend-URL
+      'https://relaunch-lo.onrender.com' // Ihre Frontend-URL
     ];
     
     if (allowedOrigins.indexOf(origin) !== -1) {
