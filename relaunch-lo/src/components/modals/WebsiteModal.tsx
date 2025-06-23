@@ -15,6 +15,7 @@ import {
   Sparkles,
   Mail
 } from "lucide-react";
+import { leadApi } from '@/lib/api';
 
 const buttonStyle =
   "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600/100 data-[state=on]:shadow-[0_0_0_2px_#be123c] transition-all duration-200 ease-in-out";
@@ -88,10 +89,10 @@ const WebsiteModal = ({ open, onClose }: ModalProps) => {
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [selectedSalutation, setSelectedSalutation] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');  const [email, setEmail] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -134,8 +135,7 @@ const WebsiteModal = ({ open, onClose }: ModalProps) => {
 
   const handleStyleClick = (style: string) => setSelectedStyle(style);
   const handleSalutationClick = (salutation: string) => setSelectedSalutation(salutation);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!websiteUrl) return alert("Bitte geben Sie Ihre Unternehmens-URL ein.");
     if (selectedGoals.length === 0) return alert("Bitte wählen Sie mindestens ein Ziel aus.");
@@ -144,8 +144,42 @@ const WebsiteModal = ({ open, onClose }: ModalProps) => {
     if (!name) return alert("Bitte geben Sie Ihren Namen ein.");
     if (!email) return alert("Bitte geben Sie Ihre E-Mail-Adresse ein.");
     if (!privacyAgreed) return alert("Bitte stimmen Sie den Datenschutzhinweisen zu.");
-    alert("Website-Anfrage abgeschickt!");
-    handleClose();
+    
+    setIsSubmitting(true);
+      try {
+      // Prepare lead data for backend
+      const leadData = {
+        name: name.trim(),
+        email: email.trim(),
+        salutation: selectedSalutation,
+        source: 'website',
+        leadType: 'warm',
+        priority: 'medium',
+        serviceDetails: {
+          website: {
+            currentUrl: websiteUrl,
+            goals: selectedGoals,
+            style: selectedStyle,
+            timeline: 'Nicht spezifiziert',
+            budget: 'Nicht spezifiziert'
+          }
+        },        privacyConsent: privacyAgreed,
+        marketingConsent: false // Default to false, could be separate checkbox
+      };
+
+      const response = await leadApi.createLead(leadData);
+      
+      if (response.success) {
+        alert("Vielen Dank! Ihre Website-Anfrage wurde erfolgreich übermittelt. Wir melden uns in Kürze bei Ihnen.");
+        handleClose();
+      } else {
+        throw new Error(response.message || 'Fehler beim Senden der Anfrage');
+      }    } catch (error) {
+      console.error('Error submitting website lead:', error);
+      alert("Es gab einen Fehler beim Senden Ihrer Anfrage. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const goalsOptions = [
@@ -339,14 +373,13 @@ const WebsiteModal = ({ open, onClose }: ModalProps) => {
                 <Label htmlFor="privacy" className="text-sm text-slate-700 cursor-pointer">
                   Ich habe die Datenschutzhinweise gelesen und stimme der Verarbeitung meiner Daten zu.
                 </Label>
-              </div>
-
-              <Button
+              </div>              <Button
                 type="submit"
-                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-6 px-4 rounded-lg transition-all"
+                disabled={isSubmitting}
+                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-6 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Sparkles className="h-5 w-5 mr-2" />
-                Website-Design anfordern
+                {isSubmitting ? 'Wird gesendet...' : 'Website-Design anfordern'}
               </Button>
             </form>
           </div>

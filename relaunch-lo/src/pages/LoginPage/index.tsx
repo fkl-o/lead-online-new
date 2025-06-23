@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
+import { authApi } from '../../lib/api';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,11 +12,28 @@ const LoginPage: React.FC = () => {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Authentifizierungs-Logik implementieren
-    navigate('/');
+    setIsSubmitting(true);
+    setMessage('');
+
+    try {
+      const response = await authApi.login({ email, password });
+      
+      if (response.success) {
+        setMessage('Login erfolgreich! Sie werden weitergeleitet...');
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000);
+      } else {
+        setMessage(response.message || 'Login fehlgeschlagen');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setMessage('Es gab einen Fehler beim Login. Bitte versuchen Sie es erneut.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Passwort zurücksetzen simulieren (keine echte API)
@@ -116,14 +134,20 @@ const LoginPage: React.FC = () => {
                     onClick={() => setIsForgotPassword(true)}
                     className="font-medium text-brand-600 hover:underline"
                   >Passwort vergessen?</button>
+                </div>              </div>
+
+              {message && (
+                <div className={`text-sm p-3 rounded ${message.includes('erfolgreich') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                  {message}
                 </div>
-              </div>
+              )}
 
               <Button
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
+                disabled={isSubmitting}
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Einloggen
+                {isSubmitting ? 'Wird eingeloggt...' : 'Einloggen'}
               </Button>
             </form>
         )}

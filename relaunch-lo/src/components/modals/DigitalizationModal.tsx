@@ -16,6 +16,7 @@ import {
   Megaphone,
   Euro
 } from "lucide-react";
+import { leadApi } from '@/lib/api';
 
 // Einheitlicher Button-Style
 const buttonStyle = "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600/100 data-[state=on]:shadow-[0_0_0_2px_#be123c] transition-all duration-200 ease-in-out";
@@ -65,10 +66,10 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
   const [url, setUrl] = useState('');
   const [areas, setAreas] = useState<string[]>([]);
   const [urgency, setUrgency] = useState('sofort');
-  const [salutation, setSalutation] = useState<string | null>(null);
-  const [name, setName] = useState('');
+  const [salutation, setSalutation] = useState<string | null>(null);  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -108,8 +109,7 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
         : [...prev, area]
     );
   };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url) return alert("Bitte geben Sie Ihre Unternehmens-URL ein.");
     if (areas.length === 0) return alert("Bitte wählen Sie mindestens einen Bereich aus.");
@@ -117,8 +117,44 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
     if (!name) return alert("Bitte geben Sie Ihren Namen ein.");
     if (!email) return alert("Bitte geben Sie Ihre E-Mail-Adresse ein.");
     if (!privacyAgreed) return alert("Bitte stimmen Sie den Datenschutzhinweisen zu.");
-    alert("Digitalisierungs-Anfrage abgeschickt!");
-    handleClose();
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Prepare lead data for backend
+      const leadData = {
+        name: name.trim(),
+        email: email.trim(),
+        salutation: salutation,
+        source: 'digitalization',
+        leadType: 'warm',
+        priority: urgency === 'sofort' ? 'high' : urgency === '1-3 Monate' ? 'medium' : 'low',
+        serviceDetails: {
+          digitalization: {
+            currentUrl: url,
+            areas: areas,
+            urgency: urgency,
+            timeline: urgency
+          }
+        },
+        privacyConsent: privacyAgreed,
+        marketingConsent: false
+      };
+
+      const response = await leadApi.createLead(leadData);
+      
+      if (response.success) {
+        alert("Vielen Dank! Ihre Digitalisierungs-Anfrage wurde erfolgreich übermittelt. Wir melden uns in Kürze bei Ihnen.");
+        handleClose();
+      } else {
+        throw new Error(response.message || 'Fehler beim Senden der Anfrage');
+      }
+    } catch (error) {
+      console.error('Error submitting digitalization lead:', error);
+      alert("Es gab einen Fehler beim Senden Ihrer Anfrage. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isMounted) return null;
@@ -288,15 +324,14 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
                 <Label htmlFor="privacy" className="text-sm text-slate-700 cursor-pointer">
                   Ich habe die Datenschutzhinweise gelesen und stimme der Verarbeitung meiner Daten zu.
                 </Label>
-              </div>
-
-              {/* Submit */}
+              </div>              {/* Submit */}
               <Button
                 type="submit"
-                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-6 px-4 rounded-lg transition-all"
+                disabled={isSubmitting}
+                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-6 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Sparkles className="h-5 w-5 mr-2" />
-                Gespräch anfordern
+                {isSubmitting ? 'Wird gesendet...' : 'Gespräch anfordern'}
               </Button>
             </form>
           </div>

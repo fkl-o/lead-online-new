@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, LogIn, Mail, Lock } from "lucide-react";
+import { authApi } from '@/lib/api';
 
 type ModalProps = {
   open: boolean;
@@ -12,9 +13,9 @@ type ModalProps = {
 
 const LoginModal = ({ open, onClose }: ModalProps) => {
   const [isMounted, setIsMounted] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -48,6 +49,30 @@ const LoginModal = ({ open, onClose }: ModalProps) => {
 
   const handleBackToLoginClick = () => {
     setIsForgotPassword(false);
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setMessage("");
+
+    try {
+      const response = await authApi.login({ email, password });
+      
+      if (response.success) {
+        setMessage("Login erfolgreich! Sie werden weitergeleitet...");
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1000);
+      } else {
+        setMessage(response.message || "Login fehlgeschlagen");
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setMessage("Es gab einen Fehler beim Login. Bitte versuchen Sie es erneut.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
@@ -148,8 +173,7 @@ const LoginModal = ({ open, onClose }: ModalProps) => {
                 Zurück zum Login
               </Button>
             </form>
-          ) : (
-            <form className="space-y-6 px-1 pb-4">
+          ) : (            <form className="space-y-6 px-1 pb-4" onSubmit={handleLogin}>
               <div>
                 <Label
                   htmlFor="email"
@@ -163,6 +187,8 @@ const LoginModal = ({ open, onClose }: ModalProps) => {
                     type="email"
                     id="email"
                     placeholder="Ihre E-Mail-Adresse"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                     className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
                   />
@@ -176,19 +202,18 @@ const LoginModal = ({ open, onClose }: ModalProps) => {
                 >
                   <Lock className="h-4 w-4 text-brand-600" />
                   Passwort
-                </Label>
-                <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
+                </Label>                <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
                   <Input
                     type="password"
                     id="password"
                     placeholder="Ihr Passwort"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                     className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
                   />
                 </div>
-              </div>
-
-              <div className="text-right">
+              </div>              <div className="text-right">
                 <button
                   type="button"
                   onClick={handleForgotPasswordClick}
@@ -198,12 +223,19 @@ const LoginModal = ({ open, onClose }: ModalProps) => {
                 </button>
               </div>
 
+              {message && (
+                <div className={`text-sm p-3 rounded ${message.includes('erfolgreich') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                  {message}
+                </div>
+              )}
+
               <Button
                 type="submit"
-                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-6 px-4 rounded-lg transition-all"
+                disabled={isSubmitting}
+                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-6 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <LogIn className="h-5 w-5 mr-2" />
-                Einloggen
+                {isSubmitting ? 'Wird eingeloggt...' : 'Einloggen'}
               </Button>
             </form>
           )}

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
+import { leadApi } from '@/lib/api';
 
 import {
   X,
@@ -23,7 +24,7 @@ type ModalProps = {
   onClose: () => void;
 };
 
-const DigitalizationModal = ({ open, onClose }: ModalProps) => {
+const AutomationModal = ({ open, onClose }: ModalProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -36,12 +37,12 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
   const [monthlyProjections, setMonthlyProjections] = useState<any[]>([]); // Data for the table/cards
   const [totalRoiOver5Months, setTotalRoiOver5Months] = useState<number | null>(null);
   const [totalProfitOver5Months, setTotalProfitOver5Months] = useState<number | null>(null);
-
   // Contact form states
   const [salutation, setSalutation] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -147,15 +148,52 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
     calculateProjections();
   }, [monthlyBudget, conversionRate, marginPerSale, calculateProjections]);
 
-
-  const handleSubmitContact = (e: React.FormEvent) => {
+  const handleSubmitContact = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!salutation) return alert("Bitte wählen Sie eine Anrede aus.");
     if (!name) return alert("Bitte geben Sie Ihren Namen ein.");
     if (!email) return alert("Bitte geben Sie Ihre E-Mail-Adresse ein.");
     if (!privacyAgreed) return alert("Bitte stimmen Sie den Datenschutzhinweisen zu.");
-    alert("Ihre Anfrage für ein Strategiegespräch wurde abgeschickt!");
-    handleClose();
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Prepare lead data for backend
+      const leadData = {
+        name: name.trim(),
+        email: email.trim(),
+        salutation: salutation,
+        source: 'automation',
+        leadType: 'hot', // Marketing automation leads are typically hot
+        priority: 'high',
+        serviceDetails: {
+          automation: {
+            monthlyBudget: monthlyBudget,
+            conversionRate: conversionRate,
+            marginPerSale: marginPerSale,
+            estimatedRoi: totalRoiOver5Months,
+            estimatedProfit: totalProfitOver5Months
+          }
+        },
+        estimatedValue: totalProfitOver5Months || 0,
+        privacyConsent: privacyAgreed,
+        marketingConsent: false
+      };
+
+      const response = await leadApi.createLead(leadData);
+      
+      if (response.success) {
+        alert("Vielen Dank! Ihre Anfrage für ein Strategiegespräch wurde erfolgreich übermittelt. Wir melden uns in Kürze bei Ihnen.");
+        handleClose();
+      } else {
+        throw new Error(response.message || 'Fehler beim Senden der Anfrage');
+      }
+    } catch (error) {
+      console.error('Error submitting automation lead:', error);
+      alert("Es gab einen Fehler beim Senden Ihrer Anfrage. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isMounted) return null;
@@ -494,15 +532,14 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
                   <Label htmlFor="privacy-contact" className="text-xs text-slate-700 cursor-pointer">
                     Ich habe die Datenschutzhinweise gelesen und stimme der Verarbeitung meiner Daten zu.
                   </Label>
-                </div>
-
-                {/* Submit Contact */}
+                </div>                {/* Submit Contact */}
                 <Button
                   type="submit"
-                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 px-3 rounded-lg transition-all text-base"
+                  disabled={isSubmitting}
+                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 px-3 rounded-lg transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles className="h-4 w-4 mr-1" />
-                  Strategiegespräch anfordern
+                  {isSubmitting ? 'Wird gesendet...' : 'Strategiegespräch anfordern'}
                 </Button>
               </form>
             </div>
@@ -513,4 +550,4 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
   );
 };
 
-export default DigitalizationModal;
+export default AutomationModal;

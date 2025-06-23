@@ -5,8 +5,13 @@ import { Menu, Mail, LogIn, X } from "lucide-react";
 import MobileMenu from "./MobileMenu";
 
 const Header = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);  const toggleMobileMenu = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleContactClick = () => {
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -23,15 +28,16 @@ const Header = () => {
             </svg>
             <span className="font-bold text-xl text-gray-900">LeadGen Pro</span>
           </Link>
-          
-          {/* Desktop Navigation */}
+            {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link to="/webentwicklung" className="text-slate-600 hover:text-slate-900 transition-colors">Webentwicklung</Link>
             <Link to="/marketing-automation" className="text-slate-600 hover:text-slate-900 transition-colors">Marketing Automation</Link>
             <Link to="/digitalization" className="text-slate-600 hover:text-slate-900 transition-colors">Digitalisierung</Link>
-          </nav>          {/* Desktop CTA */}
-          <div className="hidden md:flex space-x-4">            <Button asChild className="bg-brand-600 hover:bg-brand-700 text-white font-semibold flex items-center space-x-2">
-              <Link to="/contact">
+            <Link to="/dashboard" className="text-slate-600 hover:text-slate-900 transition-colors">Dashboard</Link>
+          </nav>{/* Desktop CTA */}
+          <div className="hidden md:flex space-x-4">
+            <Button asChild className="bg-brand-600 hover:bg-brand-700 text-white font-semibold flex items-center space-x-2">
+              <Link to="/contact" onClick={handleContactClick}>
                 <Mail className="w-4 h-4" />
                 <span>Kontakt</span>
               </Link>

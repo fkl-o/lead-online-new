@@ -14,13 +14,9 @@ import MarketingAutomationLayout from './pages/MarketingAutomation/MarketingAuto
 import DigitalizationLayout from './pages/Digitalization/DigitalizationLayout';
 import LoginPage from './pages/LoginPage';
 import ContactPage from './pages/ContactPage';
+import Dashboard from './pages/Dashboard';
+import TestPage from './pages/TestPage';
 
-// Loading fallback component (not needed anymore but kept for future use)
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-600"></div>
-  </div>
-);
 
 const router = createBrowserRouter([
   {
@@ -42,8 +38,7 @@ const router = createBrowserRouter([
       {
         path: "digitalization",
         element: <DigitalizationLayout />,
-      },
-      {
+      },      {
         path: "contact",
         element: <ContactPage />,
       }
@@ -52,6 +47,13 @@ const router = createBrowserRouter([
   { 
     path: '/login', 
     element: <LoginPage />
+  },  { 
+    path: '/dashboard', 
+    element: <Dashboard />
+  },
+  { 
+    path: '/test', 
+    element: <TestPage />
   },
 ]);
 
