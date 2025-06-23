@@ -162,17 +162,16 @@ const AutomationModal = ({ open, onClose }: ModalProps) => {
       const leadData = {
         name: name.trim(),
         email: email.trim(),
-        salutation: salutation,
-        source: 'automation',
-        leadType: 'hot', // Marketing automation leads are typically hot
-        priority: 'high',
+        salutation: salutation as 'herr' | 'frau',
+        source: 'automation' as const,        leadType: 'hot' as const, // Marketing automation leads are typically hot
+        priority: 'high' as const,
         serviceDetails: {
           automation: {
             monthlyBudget: monthlyBudget,
             conversionRate: conversionRate,
             marginPerSale: marginPerSale,
-            estimatedRoi: totalRoiOver5Months,
-            estimatedProfit: totalProfitOver5Months
+            estimatedRoi: totalRoiOver5Months !== null ? totalRoiOver5Months : undefined,
+            estimatedProfit: totalProfitOver5Months !== null ? totalProfitOver5Months : undefined
           }
         },
         estimatedValue: totalProfitOver5Months || 0,

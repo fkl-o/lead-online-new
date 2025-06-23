@@ -117,18 +117,17 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
     if (!name) return alert("Bitte geben Sie Ihren Namen ein.");
     if (!email) return alert("Bitte geben Sie Ihre E-Mail-Adresse ein.");
     if (!privacyAgreed) return alert("Bitte stimmen Sie den Datenschutzhinweisen zu.");
-    
-    setIsSubmitting(true);
+      setIsSubmitting(true);
     
     try {
       // Prepare lead data for backend
       const leadData = {
         name: name.trim(),
         email: email.trim(),
-        salutation: salutation,
-        source: 'digitalization',
-        leadType: 'warm',
-        priority: urgency === 'sofort' ? 'high' : urgency === '1-3 Monate' ? 'medium' : 'low',
+        salutation: salutation as 'herr' | 'frau',
+        source: 'digitalization' as const,
+        leadType: 'warm' as const,
+        priority: (urgency === 'sofort' ? 'high' : urgency === '1-3 Monate' ? 'medium' : 'low') as 'high' | 'medium' | 'low',
         serviceDetails: {
           digitalization: {
             currentUrl: url,

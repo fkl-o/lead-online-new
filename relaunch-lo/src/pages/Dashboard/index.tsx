@@ -3,14 +3,48 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { leadApi, authApi } from '@/lib/api';
-import { Users, Mail, Phone, Calendar, BarChart3, Target } from 'lucide-react';
+import { Users, Calendar, BarChart3, Target } from 'lucide-react';
+
+// Types
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+interface Company {
+  name?: string;
+  website?: string;
+  industry?: string;
+}
+
+interface Lead {
+  _id: string;
+  name: string;
+  email: string;
+  source: string;
+  status: string;
+  priority: string;
+  createdAt: string;
+  company?: Company;
+}
+
+interface Stats {
+  totalLeads: number;
+  statusStats?: Array<{ _id: string; count: number }>;
+  conversionStats?: {
+    conversionRate: number;
+    totalValue: number;
+  };
+}
 
 const Dashboard = () => {
-  const [leads, setLeads] = useState([]);
-  const [stats, setStats] = useState(null);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [user, setUser] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     // Check if user is logged in
@@ -49,8 +83,7 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
-  const handleStatusUpdate = async (leadId, newStatus) => {
+  const handleStatusUpdate = async (leadId: string, newStatus: string) => {
     try {
       const response = await leadApi.updateLeadStatus(leadId, newStatus);
       if (response.success) {
@@ -63,7 +96,7 @@ const Dashboard = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'new': return 'bg-blue-100 text-blue-800';
       case 'contacted': return 'bg-yellow-100 text-yellow-800';
@@ -76,7 +109,7 @@ const Dashboard = () => {
     }
   };
 
-  const getStatusLabel = (status) => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
       case 'new': return 'Neu';
       case 'contacted': return 'Kontaktiert';

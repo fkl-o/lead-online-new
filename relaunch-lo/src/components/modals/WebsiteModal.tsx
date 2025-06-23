@@ -151,10 +151,9 @@ const WebsiteModal = ({ open, onClose }: ModalProps) => {
       const leadData = {
         name: name.trim(),
         email: email.trim(),
-        salutation: selectedSalutation,
-        source: 'website',
-        leadType: 'warm',
-        priority: 'medium',
+        salutation: selectedSalutation as 'herr' | 'frau',
+        source: 'website' as const,        leadType: 'warm' as const,
+        priority: 'medium' as const,
         serviceDetails: {
           website: {
             currentUrl: websiteUrl,

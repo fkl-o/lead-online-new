@@ -6,7 +6,7 @@ import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 const TestPage = () => {
   const [backendStatus, setBackendStatus] = useState('checking');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     checkBackendStatus();
@@ -28,7 +28,7 @@ const TestPage = () => {
     } catch (err) {
       console.error('Backend health check failed:', err);
       setBackendStatus('error');
-      setError(err.message || 'Verbindung zum Backend fehlgeschlagen');
+      setError((err as Error).message || 'Verbindung zum Backend fehlgeschlagen');
     }
   };
 
