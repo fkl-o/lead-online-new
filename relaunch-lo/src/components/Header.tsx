@@ -27,13 +27,11 @@ const Header = () => {
               <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
             </svg>
             <span className="font-bold text-xl text-gray-900">LeadGen Pro</span>
-          </Link>
-            {/* Desktop Navigation */}
+          </Link>          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link to="/webentwicklung" className="text-slate-600 hover:text-slate-900 transition-colors">Webentwicklung</Link>
             <Link to="/marketing-automation" className="text-slate-600 hover:text-slate-900 transition-colors">Marketing Automation</Link>
             <Link to="/digitalization" className="text-slate-600 hover:text-slate-900 transition-colors">Digitalisierung</Link>
-            <Link to="/dashboard" className="text-slate-600 hover:text-slate-900 transition-colors">Dashboard</Link>
           </nav>{/* Desktop CTA */}
           <div className="hidden md:flex space-x-4">
             <Button asChild className="bg-brand-600 hover:bg-brand-700 text-white font-semibold flex items-center space-x-2">
