@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 import DigitalizationPage from './index';
-import DigitalizationModal from '../../components/modals/DigitalizationModal';
+
+// Lazy load modal component
+const DigitalizationModal = lazy(() => import('../../components/modals/DigitalizationModal'));
 
 const DigitalizationLayout = () => {
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -22,14 +24,17 @@ const DigitalizationLayout = () => {
           name="description"
           content="Ganzheitliche Digitalisierungslösungen für Ihr Unternehmen: Prozessoptimierung, IT-Sicherheit & Cloud-Integration."
         />
-      </Helmet>
+      </Helmet>      <DigitalizationPage onOpenModal={handleOpenModal} />
 
-      <DigitalizationPage onOpenModal={handleOpenModal} />
-
-      <DigitalizationModal
-        open={activeModal === 'digitalization'}
-        onClose={handleCloseModal}
-      />
+      {/* Lazy-loaded modal */}
+      {activeModal === 'digitalization' && (
+        <Suspense fallback={<div />}>
+          <DigitalizationModal
+            open={true}
+            onClose={handleCloseModal}
+          />
+        </Suspense>
+      )}
     </>
   );
 };

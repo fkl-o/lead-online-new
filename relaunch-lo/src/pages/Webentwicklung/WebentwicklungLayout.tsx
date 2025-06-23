@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 import WebentwicklungPage from './index';
-import WebsiteModal from '../../components/modals/WebsiteModal';
+
+// Lazy load modal component
+const WebsiteModal = lazy(() => import('../../components/modals/WebsiteModal'));
 
 const WebentwicklungLayout = () => {
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -23,14 +25,17 @@ const WebentwicklungLayout = () => {
           content="Professionelle Webentwicklung und digitale Lösungen für Ihr Unternehmen. Moderne, responsive Websites und Webanwendungen." 
         />
       </Helmet>
-      
-      <WebentwicklungPage onOpenModal={handleOpenModal} />
+        <WebentwicklungPage onOpenModal={handleOpenModal} />
 
-      {/* Modal-Komponenten */}
-      <WebsiteModal 
-        open={activeModal === 'website'} 
-        onClose={handleCloseModal} 
-      />
+      {/* Lazy-loaded modal */}
+      {activeModal === 'website' && (
+        <Suspense fallback={<div />}>
+          <WebsiteModal 
+            open={true} 
+            onClose={handleCloseModal} 
+          />
+        </Suspense>
+      )}
     </>
   );
 };

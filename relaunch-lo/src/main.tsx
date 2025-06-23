@@ -1,19 +1,28 @@
 // PFAD: src/main.tsx
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 
-// Die Importpfade benötigen keine Endung mehr, Vite/TS findet die .tsx-Dateien
+// Static imports for core components
 import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
-import WebentwicklungLayout from './pages/Webentwicklung/WebentwicklungLayout';
-import MarketingAutomationLayout from './pages/MarketingAutomation/MarketingAutomationLayout';
-import DigitalizationLayout from './pages/Digitalization/DigitalizationLayout';
-import LoginPage from './pages/LoginPage';
-import ContactPage from './pages/ContactPage';
+
+// Dynamic imports using React.lazy for code splitting
+const HomePage = React.lazy(() => import('./pages/HomePage'));
+const WebentwicklungLayout = React.lazy(() => import('./pages/Webentwicklung/WebentwicklungLayout'));
+const MarketingAutomationLayout = React.lazy(() => import('./pages/MarketingAutomation/MarketingAutomationLayout'));
+const DigitalizationLayout = React.lazy(() => import('./pages/Digitalization/DigitalizationLayout'));
+const LoginPage = React.lazy(() => import('./pages/LoginPage'));
+const ContactPage = React.lazy(() => import('./pages/ContactPage'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-600"></div>
+  </div>
+);
 
 const router = createBrowserRouter([
   {
@@ -22,26 +31,54 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <HomePage />,
-      },      {
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <HomePage />
+          </Suspense>
+        ),
+      },
+      {
         path: "webentwicklung",
-        element: <WebentwicklungLayout />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <WebentwicklungLayout />
+          </Suspense>
+        ),
       },
       {
         path: "marketing-automation",
-        element: <MarketingAutomationLayout />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <MarketingAutomationLayout />
+          </Suspense>
+        ),
       },
       {
         path: "digitalization",
-        element: <DigitalizationLayout />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <DigitalizationLayout />
+          </Suspense>
+        ),
       },
       {
         path: "contact",
-        element: <ContactPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ContactPage />
+          </Suspense>
+        ),
       }
     ],
   },
-  { path: '/login', element: <LoginPage /> },
+  { 
+    path: '/login', 
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <LoginPage />
+      </Suspense>
+    )
+  },
 ]);
 
 const rootElement = document.getElementById('root');
