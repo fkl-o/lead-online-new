@@ -50,9 +50,8 @@ export default defineConfig({
             '@radix-ui/react-toggle-group',
             '@radix-ui/react-tooltip'
           ],
-          
-          // Animation libraries
-          'animation': ['framer-motion'],
+            // Animation libraries (removed framer-motion)
+          // 'animation': ['framer-motion'],
           
           // Icon libraries
           'icons': ['lucide-react'],
