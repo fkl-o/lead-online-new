@@ -10,7 +10,7 @@ type DigitalizationPageProps = {
 const DigitalizationPage = ({ onOpenModal }: DigitalizationPageProps) => {
   return (
     <>
-      <HeroSection />
+      <HeroSection onOpenModal={onOpenModal} />
       <ServicesSection />
       <BenefitsSection />
       <CtaSection onOpenModal={onOpenModal} />

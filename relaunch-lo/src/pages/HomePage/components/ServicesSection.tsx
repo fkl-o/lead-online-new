@@ -20,60 +20,94 @@ const ServicesSection = ({ onOpenModal }: ServicesSectionProps) => {
             </div>            <div ref={cardsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto reveal">
                 {/* Card 1: Webentwicklung */}
                 <Card className="group bg-white p-8 rounded-2xl border border-gray-200 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl flex flex-col">
-                    <CardHeader className="p-0">                        <div className="flex justify-between items-start mb-4">
+                    <CardHeader className="p-0">
+                        <div className="flex justify-between items-start mb-4">
                             <Code2 className="w-10 h-10 text-secondary-600" />
-                            <span className="service-pill service-pill-brand">Neueste Technologie</span>
+                            <span className="service-pill service-pill-brand">Kostenlos & unverbindlich</span>
                         </div>
-                        <CardTitle className="font-bold text-2xl text-gray-900 mb-2">Webentwicklung</CardTitle>
-                        <CardDescription className="font-semibold text-gray-700 mb-4">Ihr interaktives Homepage-Design – kostenlos in 72 Stunden</CardDescription>
+                        <CardTitle className="font-bold text-2xl text-gray-900 mb-2">Homepage-Design</CardTitle>
+                        <CardDescription className="font-semibold text-brand-600 text-lg mb-4">
+                            Ihr individuelles, interaktives Website-Design – kostenlos in 72 Stunden
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow p-0">
-                        <ul className="space-y-2 text-slate-600 list-disc list-inside mb-6">
-                            <li>Blitzschnelle Performance</li>
-                            <li>SEO-Ready & On-Page-Optimierung</li>
-                            <li>Conversion-optimiertes UX-Design</li>
-                        </ul>
+                        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                            <p className="text-sm text-gray-600 mb-2">So funktioniert's:</p>
+                            <ul className="space-y-2 text-sm text-gray-700">
+                                <li>✓ Ziele & Stil-Präferenzen festlegen</li>
+                                <li>✓ Vollständiges, klickbares Design</li>
+                                <li>✓ Mobile & Desktop optimiert</li>
+                                <li>✓ Fertig für die Umsetzung</li>
+                            </ul>
+                        </div>
+                        <p className="text-xs text-gray-500 italic">Echtes Design, nicht nur Mockup. Sofort testbar und nutzbar.</p>
                     </CardContent>
                     <CardFooter className="p-0">
-                         <Button onClick={() => onOpenModal('website')} className="mt-auto w-full bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3 px-4 rounded-lg">Design anfordern</Button>
+                        <Button onClick={() => onOpenModal('website')} className="mt-auto w-full bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3 px-4 rounded-lg">
+                            Design-Anfrage starten
+                        </Button>
                     </CardFooter>
-                </Card>                {/* Card 2: Marketing Automation */}
+                </Card>
+
+                {/* Card 2: Marketing Automation */}
                 <Card className="group bg-white p-8 rounded-2xl border border-gray-200 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl flex flex-col">
-                    <CardHeader className="p-0">                        <div className="flex justify-between items-start mb-4">
+                    <CardHeader className="p-0">
+                        <div className="flex justify-between items-start mb-4">
                             <Bot className="w-10 h-10 text-secondary-600" />
-                            <span className="service-pill service-pill-green">ROI-Fokus</span>
+                            <span className="service-pill service-pill-green">Interaktiv & kostenlos</span>
                         </div>
-                        <CardTitle className="font-bold text-2xl text-gray-900 mb-2">Marketing Automation</CardTitle>
-                        <CardDescription className="font-semibold text-gray-700 mb-4">Kostenlose Potenzial-Analyse – ROI-Prognose per E-Mail</CardDescription>
+                        <CardTitle className="font-bold text-2xl text-gray-900 mb-2">ROI-Kalkulator</CardTitle>
+                        <CardDescription className="font-semibold text-brand-600 text-lg mb-4">
+                            Berechnen Sie Ihr Marketing-ROI live mit unserem Kalkulator
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow p-0">
-                        <ul className="space-y-2 text-slate-600 list-disc list-inside mb-6">
-                            <li>Lead-Qualität steigern</li>
-                            <li>Zeit sparen durch Routinetasks</li>
-                            <li>Prozesse, die mitwachsen</li>
-                        </ul>
+                        <div className="bg-green-50 rounded-lg p-4 mb-6">
+                            <p className="text-sm text-green-700 mb-2">Sofort verfügbar:</p>
+                            <ul className="space-y-2 text-sm text-green-600">
+                                <li>🧮 Live-Rechner mit Schiebereglern</li>
+                                <li>📊 5-Monats-Prognose inkl. Tabelle</li>
+                                <li>💰 Detaillierte Gewinn-Aufschlüsselung</li>
+                                <li>📞 Optionales Strategiegespräch</li>
+                            </ul>
+                        </div>
+                        <p className="text-xs text-gray-500 italic">Keine Anmeldung nötig. Bei Interesse Gespräch vereinbaren.</p>
                     </CardContent>
                     <CardFooter className="p-0">
-                        <Button onClick={() => onOpenModal('automation')} className="mt-auto w-full bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3 px-4 rounded-lg">ROI-Analyse anfordern</Button>
+                        <Button onClick={() => onOpenModal('automation')} className="mt-auto w-full bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3 px-4 rounded-lg">
+                            ROI jetzt berechnen
+                        </Button>
                     </CardFooter>
-                </Card>                {/* Card 3: Digitalisierung */}
+                </Card>
+
+                {/* Card 3: Digitalisierung */}
                 <Card className="group bg-white p-8 rounded-2xl border border-gray-200 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl flex flex-col">
-                     <CardHeader className="p-0">                        <div className="flex justify-between items-start mb-4">
+                    <CardHeader className="p-0">
+                        <div className="flex justify-between items-start mb-4">
                             <Briefcase className="w-10 h-10 text-secondary-600" />
-                            <span className="service-pill service-pill-blue">Zukunftssicher</span>
+                            <span className="service-pill service-pill-blue">15 Min. kostenlos</span>
                         </div>
-                        <CardTitle className="font-bold text-2xl text-gray-900 mb-2">Digitalisierung</CardTitle>
-                        <CardDescription className="font-semibold text-gray-700 mb-4">Ihr 15-minütiges Digitalisierungs-Strategiegespräch</CardDescription>
+                        <CardTitle className="font-bold text-2xl text-gray-900 mb-2">Digitalisierungs-Check</CardTitle>
+                        <CardDescription className="font-semibold text-brand-600 text-lg mb-4">
+                            15-minütiges Strategiegespräch mit konkreten Handlungsempfehlungen
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow p-0">
-                        <ul className="space-y-2 text-slate-600 list-disc list-inside mb-6">
-                            <li>Effizienz steigern & Engpässe finden</li>
-                            <li>Fehler reduzieren & Medienbrüche stopfen</li>
-                            <li>Zukunftssichere IT-Architektur</li>
-                        </ul>
+                        <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                            <p className="text-sm text-blue-700 mb-2">Ablauf des Gesprächs:</p>
+                            <ul className="space-y-2 text-sm text-blue-600">
+                                <li>🏢 Ihre Bereiche & Dringlichkeit erfassen</li>
+                                <li>🔍 Ist-Analyse & Effizienz-Blocker finden</li>
+                                <li>🎯 3 konkrete Sofort-Maßnahmen</li>
+                                <li>🚀 90-Tage-Roadmap entwickeln</li>
+                            </ul>
+                        </div>
+                        <p className="text-xs text-gray-500 italic">Terminbuchung direkt nach Formular. Ohne Verkaufsdruck.</p>
                     </CardContent>
                     <CardFooter className="p-0">
-                        <Button onClick={() => onOpenModal('digitalization')} className="mt-auto w-full bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3 px-4 rounded-lg">Gespräch anfordern</Button>
+                        <Button onClick={() => onOpenModal('digitalization')} className="mt-auto w-full bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3 px-4 rounded-lg">
+                            Gespräch vereinbaren
+                        </Button>
                     </CardFooter>
                 </Card>
             </div>

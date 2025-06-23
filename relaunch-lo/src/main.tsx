@@ -13,6 +13,7 @@ import WebentwicklungLayout from './pages/Webentwicklung/WebentwicklungLayout';
 import MarketingAutomationLayout from './pages/MarketingAutomation/MarketingAutomationLayout';
 import DigitalizationLayout from './pages/Digitalization/DigitalizationLayout';
 import LoginPage from './pages/LoginPage';
+import ContactPage from './pages/ContactPage';
 
 const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
       {
         path: "digitalization",
         element: <DigitalizationLayout />,
+      },
+      {
+        path: "contact",
+        element: <ContactPage />,
       }
     ],
   },

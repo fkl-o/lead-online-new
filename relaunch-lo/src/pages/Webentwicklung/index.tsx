@@ -10,7 +10,7 @@ type WebentwicklungPageProps = {
 const WebentwicklungPage = ({ onOpenModal }: WebentwicklungPageProps) => {
   return (
     <>
-      <HeroSection />
+      <HeroSection onOpenModal={onOpenModal} />
       <ServicesSection />
       <BenefitsSection />
       <CtaSection onOpenModal={onOpenModal} />

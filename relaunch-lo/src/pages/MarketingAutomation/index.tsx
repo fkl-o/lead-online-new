@@ -10,7 +10,7 @@ type MarketingAutomationPageProps = {
 const MarketingAutomationPage = ({ onOpenModal }: MarketingAutomationPageProps) => {
   return (
     <>
-      <HeroSection />
+      <HeroSection onOpenModal={onOpenModal} />
       <ServicesSection />
       <BenefitsSection />
       <CtaSection onOpenModal={onOpenModal} />
