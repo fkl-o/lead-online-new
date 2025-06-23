@@ -19,6 +19,21 @@ import { notFound } from './middleware/notFound.js';
 // Load environment variables
 dotenv.config();
 
+// Validate required environment variables
+const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingEnvVars);
+  console.log('📋 Available environment variables:');
+  Object.keys(process.env).sort().forEach(key => {
+    if (key.includes('MONGO') || key.includes('JWT') || key.includes('NODE') || key.includes('PORT')) {
+      console.log(`   ${key}: ${key.includes('URI') || key.includes('SECRET') ? '[HIDDEN]' : process.env[key]}`);
+    }
+  });
+  process.exit(1);
+}
+
 const app = express();
 
 // Trust proxy for rate limiting
@@ -74,6 +89,24 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
+// Root route - API status
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Lead Management API Server',
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      leads: '/api/leads',
+      users: '/api/users',
+      test: '/api/test'
+    }
+  });
+});
+
 // Health check route
 app.get('/api/health', (req, res) => {
   res.status(200).json({
@@ -97,10 +130,19 @@ app.use(errorHandler);
 // Database connection
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    const mongoUri = process.env.MONGODB_URI;
+    
+    if (!mongoUri) {
+      console.error('❌ MONGODB_URI environment variable is not set');
+      console.log('Available environment variables:', Object.keys(process.env).filter(key => key.includes('MONGO')));
+      process.exit(1);
+    }
+    
+    console.log('🔗 Connecting to MongoDB...');
+    const conn = await mongoose.connect(mongoUri);
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error('Database connection error:', error);
+    console.error('❌ Database connection error:', error);
     process.exit(1);
   }
 };
