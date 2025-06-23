@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { LogIn, Mail } from 'lucide-react';
@@ -9,24 +9,18 @@ type MobileMenuProps = {
 };
 
 const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
-  const [isVisible, setIsVisible] = useState(false);
-
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      setIsVisible(true);
     } else {
       document.body.style.overflow = 'auto';
-      // Delay hiding to allow exit animation
-      const timer = setTimeout(() => setIsVisible(false), 300);
-      return () => clearTimeout(timer);
     }
     return () => {
       document.body.style.overflow = 'auto';
     };
   }, [isOpen]);
 
-  if (!isVisible && !isOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <div
