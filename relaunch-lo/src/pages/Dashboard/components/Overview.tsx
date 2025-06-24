@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,12 +12,11 @@ import {
   Clock,
   Star,
   ArrowUpRight,
-  ArrowDownRight,
   MoreHorizontal,
   Plus,
   Eye
 } from 'lucide-react';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Line, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface Stats {
   totalLeads: number;
@@ -50,15 +48,6 @@ const leadSourceData = [
   { name: 'Social Media', value: 200, color: '#3b82f6' },
   { name: 'Empfehlungen', value: 150, color: '#10b981' },
   { name: 'Sonstige', value: 100, color: '#8b5cf6' },
-];
-
-const activityData = [
-  { time: '00:00', calls: 12, emails: 23, meetings: 5 },
-  { time: '04:00', calls: 18, emails: 35, meetings: 8 },
-  { time: '08:00', calls: 32, emails: 67, meetings: 15 },
-  { time: '12:00', calls: 45, emails: 89, meetings: 22 },
-  { time: '16:00', calls: 38, emails: 72, meetings: 18 },
-  { time: '20:00', calls: 25, emails: 45, meetings: 10 },
 ];
 
 const recentActivities = [
@@ -121,15 +110,11 @@ const upcomingTasks = [
 ];
 
 const Overview = ({ stats, user }: OverviewProps) => {
-  const [timeRange, setTimeRange] = useState('30d');
-  
-  const isAdmin = user?.role === 'admin';
   const conversion = stats?.conversionStats?.conversionRate || 0;
   const totalValue = stats?.conversionStats?.totalValue || 0;
   
   // Calculate additional metrics
   const activeLeads = stats?.statusStats?.find(s => ['new', 'contacted', 'qualified'].includes(s._id))?.count || 0;
-  const wonLeads = stats?.statusStats?.find(s => s._id === 'closed-won')?.count || 0;
   
   return (
     <div className="space-y-6">      {/* Welcome Section */}

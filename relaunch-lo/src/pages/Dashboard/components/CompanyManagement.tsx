@@ -34,7 +34,6 @@ import {
   Building2, 
   Plus,
   Search,
-  Filter,
   Download,
   Upload,
   MoreHorizontal,
@@ -43,7 +42,6 @@ import {
   Mail,
   Phone,
   Globe,
-  MapPin,
   Users,
   Calendar,
   Star,
@@ -143,7 +141,7 @@ const mockCompanies: Company[] = [
   }
 ];
 
-const CompanyManagement = ({ currentUser }: CompanyManagementProps) => {
+const CompanyManagement = ({ currentUser: _currentUser }: CompanyManagementProps) => {
   const [companies, setCompanies] = useState<Company[]>(mockCompanies);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterIndustry, setFilterIndustry] = useState<string>('all');
