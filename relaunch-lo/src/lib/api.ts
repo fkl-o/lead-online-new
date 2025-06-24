@@ -125,6 +125,13 @@ export const leadApi = {
       body: JSON.stringify({ status }),
     });
   },
+  // Update lead data
+  updateLead: async (id: string, leadData: Partial<any>): Promise<ApiResponse> => {
+    return apiCall(`/leads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(leadData),
+    });
+  },
 
   // Add communication to lead
   addCommunication: async (id: string, communication: any): Promise<ApiResponse> => {
@@ -132,6 +139,40 @@ export const leadApi = {
       method: 'POST',
       body: JSON.stringify(communication),
     });
+  },
+  // Add comment to lead
+  addComment: async (id: string, comment: { text: string }): Promise<ApiResponse> => {
+    return apiCall(`/leads/${id}/communication`, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: 'follow-up',
+        subject: 'Kommentar',
+        content: comment.text,
+        date: new Date().toISOString()
+      }),
+    });
+  },  // Upload file to lead
+  uploadFile: async (id: string, file: File): Promise<ApiResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`${API_BASE_URL}/leads/${id}/attachments`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        // Content-Type wird automatisch von FormData gesetzt
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Upload failed');
+    }
+
+    const result = await response.json();
+    return result;
   },
 
   // Get lead statistics
@@ -181,6 +222,108 @@ export const authApi = {
   logout: (): void => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+  },
+};
+
+// User API functions
+export const userApi = {
+  // Get all users with filters and pagination
+  getUsers: async (params?: {
+    page?: number;
+    limit?: number;
+    role?: string;
+    isActive?: boolean;
+    search?: string;
+    sortBy?: string;
+  }): Promise<ApiResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.role) queryParams.append('role', params.role);
+    if (params?.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+
+    const endpoint = `/users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return apiCall(endpoint);
+  },
+
+  // Get single user by ID
+  getUser: async (id: string): Promise<ApiResponse> => {
+    return apiCall(`/users/${id}`);
+  },
+  // Create new user
+  createUser: async (userData: {
+    name: string;
+    email: string;
+    password: string;
+    role: 'admin' | 'vertrieb' | 'kunde' | 'lead';
+    profile?: {
+      company?: string;
+      companyUrl?: string;
+      phone?: string;
+      department?: string;
+      position?: string;
+    };
+  }): Promise<ApiResponse> => {
+    return apiCall('/users', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+  },
+
+  // Update user
+  updateUser: async (id: string, userData: Partial<{
+    name: string;
+    email: string;
+    role: 'admin' | 'vertrieb' | 'kunde' | 'lead';
+    isActive: boolean;
+    profile: {
+      company?: string;
+      companyUrl?: string;
+      phone?: string;
+      department?: string;
+      position?: string;
+    };
+  }>): Promise<ApiResponse> => {
+    return apiCall(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+    });
+  },
+  // Delete user (soft delete - deactivate)
+  deleteUser: async (id: string): Promise<ApiResponse> => {
+    return apiCall(`/users/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Permanently delete user (hard delete)
+  permanentDeleteUser: async (id: string): Promise<ApiResponse> => {
+    return apiCall(`/users/${id}/permanent`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Get user statistics
+  getUserStats: async (): Promise<ApiResponse> => {
+    return apiCall('/users/stats');
+  },
+
+  // Reset user password
+  resetPassword: async (id: string, newPassword: string): Promise<ApiResponse> => {
+    return apiCall(`/users/${id}/reset-password`, {
+      method: 'POST',
+      body: JSON.stringify({ password: newPassword }),
+    });
+  },
+
+  // Toggle user active status
+  toggleUserStatus: async (id: string, isActive: boolean): Promise<ApiResponse> => {
+    return apiCall(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ isActive }),
+    });
   },
 };
 

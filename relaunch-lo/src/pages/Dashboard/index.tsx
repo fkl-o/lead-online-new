@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { leadApi, authApi } from '@/lib/api';
-import { Users, Calendar, BarChart3, Target } from 'lucide-react';
+
+// Components
+import Sidebar from './components/Sidebar';
+import TopBar from './components/TopBar';
+import Overview from './components/Overview';
+import StatsCards from './components/StatsCards';
+import LeadsTable from './components/LeadsTable';
+import LeadEditModal from './components/LeadEditModal';
+import UserManagement from './components/UserManagement';
+import { LoadingState, ErrorState } from './components/LoadingAndErrorStates';
 
 // Types
 interface User {
@@ -17,17 +23,54 @@ interface Company {
   name?: string;
   website?: string;
   industry?: string;
+  size?: string;
+  phone?: string;
+  address?: string;
+}
+
+interface Comment {
+  _id: string;
+  userId: {
+    _id: string;
+    name: string;
+  };
+  type: 'email' | 'phone' | 'meeting' | 'proposal' | 'follow-up';
+  subject?: string;
+  content: string;
+  date: string;
+  direction?: 'inbound' | 'outbound';
+}
+
+interface Attachment {
+  _id: string;
+  filename: string;
+  originalName?: string;
+  url: string;
+  fileSize?: number;
+  mimeType?: string;
+  uploadedAt: string;
+  uploadedBy?: {
+    _id: string;
+    name: string;
+  };
 }
 
 interface Lead {
   _id: string;
   name: string;
   email: string;
+  salutation?: 'herr' | 'frau';
+  phone?: string;
   source: string;
   status: string;
   priority: string;
   createdAt: string;
+  updatedAt?: string;
+  notes?: string;
+  value?: number;
   company?: Company;
+  communications?: Comment[];
+  attachments?: Attachment[];
 }
 
 interface Stats {
@@ -45,6 +88,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState<Partial<Lead>>({});
+  const [currentView, setCurrentView] = useState('overview');
 
   useEffect(() => {
     // Check if user is logged in
@@ -82,8 +129,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
-  const handleStatusUpdate = async (leadId: string, newStatus: string) => {
+  };  const handleStatusUpdate = async (leadId: string, newStatus: string) => {
     try {
       const response = await leadApi.updateLeadStatus(leadId, newStatus);
       if (response.success) {
@@ -96,218 +142,171 @@ const Dashboard = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800';
-      case 'contacted': return 'bg-yellow-100 text-yellow-800';
-      case 'qualified': return 'bg-green-100 text-green-800';
-      case 'proposal': return 'bg-purple-100 text-purple-800';
-      case 'negotiation': return 'bg-orange-100 text-orange-800';
-      case 'closed-won': return 'bg-emerald-100 text-emerald-800';
-      case 'closed-lost': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const handleEditLead = (lead: Lead) => {
+    setSelectedLead(lead);
+    setEditForm({
+      ...lead,
+      company: { ...lead.company }
+    });
+    setIsEditModalOpen(true);
   };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'new': return 'Neu';
-      case 'contacted': return 'Kontaktiert';
-      case 'qualified': return 'Qualifiziert';
-      case 'proposal': return 'Angebot';
-      case 'negotiation': return 'Verhandlung';
-      case 'closed-won': return 'Gewonnen';
-      case 'closed-lost': return 'Verloren';
-      default: return status;
+  const handleSaveLead = async () => {
+    if (!selectedLead || !editForm) return;
+    
+    try {
+      // Extract only the fields that should be updated, excluding communications and attachments
+      const { communications, attachments, ...leadUpdateData } = editForm;
+      
+      const response = await leadApi.updateLead(selectedLead._id, leadUpdateData);
+      if (response.success) {
+        setIsEditModalOpen(false);
+        setSelectedLead(null);
+        setEditForm({});
+        loadDashboardData();
+        alert('Lead erfolgreich aktualisiert!');
+      }
+    } catch (err) {
+      console.error('Error updating lead:', err);
+      alert('Fehler beim Speichern des Leads');
     }
-  };
+  };const handleAddComment = async (commentText: string) => {
+    if (!selectedLead || !commentText.trim()) return;
+    
+    try {
+      const response = await leadApi.addComment(selectedLead._id, { text: commentText });
+      if (response.success && response.data) {
+        // Update the editForm with the updated lead data (including new communication)
+        setEditForm(prev => ({
+          ...prev,
+          communications: response.data.communications || []
+        }));
+        
+        // Also update the selectedLead for consistency
+        setSelectedLead(response.data);
+        
+        alert('Kommentar erfolgreich hinzugefügt!');
+      }
+    } catch (err) {
+      console.error('Error adding comment:', err);
+      alert('Fehler beim Hinzufügen des Kommentars');
+    }  };
 
-  const handleLogout = () => {
+  const handleFormChange = (field: string, value: any) => {
+    if (field.startsWith('company.')) {
+      const companyField = field.replace('company.', '');
+      setEditForm(prev => ({
+        ...prev,
+        company: {
+          ...prev.company,
+          [companyField]: value
+        }
+      }));
+    } else {
+      setEditForm(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
+  };  const handleLogout = () => {
     authApi.logout();
     setUser(null);
     setLeads([]);
     setStats(null);
     setError('Sie wurden ausgeloggt.');
   };
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'overview':
+        return <Overview stats={stats || { totalLeads: 0 }} user={user} />;
+      case 'leads':
+        return (
+          <div className="space-y-6">
+            {stats && <StatsCards stats={stats} />}
+            <LeadsTable 
+              leads={leads}
+              onEditLead={handleEditLead}
+              onStatusUpdate={handleStatusUpdate}
+            />
+          </div>
+        );      case 'users':
+        return user?.role === 'admin' ? (
+          <UserManagement currentUser={user} />
+        ) : (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="mb-4">
+                <div className="mx-auto h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <span className="text-red-500 text-lg">🔒</span>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Zugriff verweigert</h3>
+              <p className="text-gray-600 max-w-sm">
+                Sie haben keine Berechtigung, diese Seite zu sehen. Nur Administratoren können auf die Benutzerverwaltung zugreifen.
+              </p>
+            </div>
+          </div>
+        );
+      default:
+        // Für alle anderen Views (die disabled sind)
+        return (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="mb-4">
+                <div className="mx-auto h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center">
+                  <span className="text-gray-400 text-lg">🚧</span>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Feature in Entwicklung</h3>
+              <p className="text-gray-600 max-w-sm">
+                Diese Funktion wird derzeit entwickelt und wird in einer zukünftigen Version verfügbar sein.
+              </p>
+            </div>
+          </div>
+        );
+    }
+  };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Dashboard wird geladen...</p>
-        </div>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="max-w-md w-full">
-          <CardHeader>
-            <CardTitle className="text-red-600">Fehler</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.href = '/'} className="w-full">
-              Zur Startseite
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <ErrorState error={error} />;
   }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">LeadGen Pro Dashboard</h1>
-            {user && <p className="text-gray-600">Willkommen, {user.name}!</p>}
-          </div>
-          <Button variant="outline" onClick={handleLogout}>
-            Ausloggen
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <Sidebar
+        currentView={currentView}
+        onViewChange={setCurrentView}
+        user={user}
+      />
 
-      <div className="container mx-auto px-6 py-8">
-        {/* Stats Cards */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Gesamt Leads</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalLeads || 0}</div>
-              </CardContent>
-            </Card>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Bar */}
+        <TopBar
+          user={user}
+          currentView={currentView}
+          onLogout={handleLogout}
+        />
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Gewonnene Leads</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {stats.statusStats?.find(s => s._id === 'closed-won')?.count || 0}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats.conversionStats?.conversionRate?.toFixed(1) || 0}%
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Gesamt Wert</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  €{stats.conversionStats?.totalValue?.toLocaleString('de-DE') || 0}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Leads Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Alle Leads</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {leads.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">Noch keine Leads vorhanden.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2">Name</th>
-                      <th className="text-left py-2">E-Mail</th>
-                      <th className="text-left py-2">Quelle</th>
-                      <th className="text-left py-2">Status</th>
-                      <th className="text-left py-2">Priorität</th>
-                      <th className="text-left py-2">Erstellt</th>
-                      <th className="text-left py-2">Aktionen</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {leads.map((lead) => (
-                      <tr key={lead._id} className="border-b hover:bg-gray-50">
-                        <td className="py-2">
-                          <div>
-                            <p className="font-medium">{lead.name}</p>
-                            {lead.company?.name && (
-                              <p className="text-sm text-gray-500">{lead.company.name}</p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-2">
-                          <a href={`mailto:${lead.email}`} className="text-blue-600 hover:underline">
-                            {lead.email}
-                          </a>
-                        </td>
-                        <td className="py-2">
-                          <Badge variant="outline">{lead.source}</Badge>
-                        </td>
-                        <td className="py-2">
-                          <Badge className={getStatusColor(lead.status)}>
-                            {getStatusLabel(lead.status)}
-                          </Badge>
-                        </td>
-                        <td className="py-2">
-                          <Badge 
-                            variant={lead.priority === 'high' ? 'destructive' : 
-                                   lead.priority === 'medium' ? 'default' : 'secondary'}
-                          >
-                            {lead.priority === 'high' ? 'Hoch' : 
-                             lead.priority === 'medium' ? 'Mittel' : 'Niedrig'}
-                          </Badge>
-                        </td>
-                        <td className="py-2 text-sm text-gray-500">
-                          {new Date(lead.createdAt).toLocaleDateString('de-DE')}
-                        </td>
-                        <td className="py-2">
-                          <select 
-                            value={lead.status}
-                            onChange={(e) => handleStatusUpdate(lead._id, e.target.value)}
-                            className="text-sm border rounded px-2 py-1"
-                          >
-                            <option value="new">Neu</option>
-                            <option value="contacted">Kontaktiert</option>
-                            <option value="qualified">Qualifiziert</option>
-                            <option value="proposal">Angebot</option>
-                            <option value="negotiation">Verhandlung</option>
-                            <option value="closed-won">Gewonnen</option>
-                            <option value="closed-lost">Verloren</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Content Area */}
+        <main className="flex-1 p-6 overflow-auto">
+          {renderCurrentView()}
+        </main>
       </div>
+
+      {/* Lead Edit Modal */}
+      <LeadEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        selectedLead={selectedLead}
+        editForm={editForm}
+        onFormChange={handleFormChange}
+        onSave={handleSaveLead}
+        onAddComment={handleAddComment}
+      />
     </div>
   );
 };

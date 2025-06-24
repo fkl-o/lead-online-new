@@ -6,6 +6,9 @@ import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 
+// Load environment variables FIRST
+dotenv.config();
+
 // Route Imports
 import authRoutes from './routes/auth.js';
 import leadRoutes from './routes/leads.js';
@@ -15,9 +18,6 @@ import testRoutes from './routes/test.js';
 // Middleware Imports
 import { errorHandler } from './middleware/error.js';
 import { notFound } from './middleware/notFound.js';
-
-// Load environment variables
-dotenv.config();
 
 // Validate required environment variables
 const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
@@ -79,6 +79,9 @@ app.use(limiter);
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
 
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {
@@ -164,14 +167,36 @@ const startServer = async () => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Promise Rejection:', err);
-  process.exit(1);
+  console.error('💥 Unhandled Promise Rejection:', {
+    message: err.message,
+    stack: err.stack,
+    name: err.name
+  });
+  
+  // In development, don't crash the server for debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔄 Continuing in development mode...');
+  } else {
+    console.log('🚨 Shutting down server due to unhandled promise rejection...');
+    process.exit(1);
+  }
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  process.exit(1);
+  console.error('💥 Uncaught Exception:', {
+    message: err.message,
+    stack: err.stack,
+    name: err.name
+  });
+  
+  // In development, don't crash the server for debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔄 Continuing in development mode...');
+  } else {
+    console.log('🚨 Shutting down server due to uncaught exception...');
+    process.exit(1);
+  }
 });
 
 // Graceful shutdown

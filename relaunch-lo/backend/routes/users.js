@@ -6,6 +6,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  permanentDeleteUser,
   getUserStats
 } from '../controllers/users.js';
 
@@ -26,5 +27,8 @@ router.route('/:id')
   .get(getUser)
   .put(updateUser)
   .delete(deleteUser);
+
+router.route('/:id/permanent')
+  .delete(permanentDeleteUser);
 
 export default router;

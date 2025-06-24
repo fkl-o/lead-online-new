@@ -1,5 +1,6 @@
 import express from 'express';
 import { protect, authorize } from '../middleware/auth.js';
+import { upload } from '../config/upload.js';
 import {
   createLead,
   getLeads,
@@ -15,7 +16,10 @@ import {
   assignLead,
   bulkUpdateLeads,
   exportLeads,
-  getLeadActivities
+  getLeadActivities,
+  uploadAttachment,
+  downloadAttachment,
+  deleteAttachment
 } from '../controllers/leads.js';
 
 const router = express.Router();
@@ -62,6 +66,15 @@ router.route('/:id/communication')
 
 router.route('/:id/task')
   .post(authorize('admin', 'user'), addTask);
+
+router.route('/:id/attachments')
+  .post(authorize('admin', 'user'), upload.single('file'), uploadAttachment);
+
+router.route('/:id/attachments/:attachmentId/download')
+  .get(authorize('admin', 'user'), downloadAttachment);
+
+router.route('/:id/attachments/:attachmentId')
+  .delete(authorize('admin'), deleteAttachment);
 
 router.route('/:id/activities')
   .get(authorize('admin', 'user'), getLeadActivities);

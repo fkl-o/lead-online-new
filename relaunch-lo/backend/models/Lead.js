@@ -113,8 +113,7 @@ const leadSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  
-  // Communication History
+    // Communication History
   communications: [{
     type: {
       type: String,
@@ -133,6 +132,26 @@ const leadSchema = new mongoose.Schema({
       default: 'outbound'
     },
     userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  }],
+
+  // Attachments
+  attachments: [{
+    filename: {
+      type: String,
+      required: true
+    },
+    originalName: String,
+    url: String,
+    fileSize: Number,
+    mimeType: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    },
+    uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }
@@ -193,14 +212,40 @@ const leadSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  
-  // Metadata
+    // Metadata
   notes: String,
   tags: [String],
   customFields: {
     type: Map,
     of: mongoose.Schema.Types.Mixed
   },
+  
+  // Attachments
+  attachments: [{
+    filename: {
+      type: String,
+      required: true
+    },
+    originalName: {
+      type: String,
+      required: true
+    },
+    url: {
+      type: String,
+      required: true
+    },
+    fileSize: Number,
+    mimeType: String,
+    uploadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   
   // System fields
   isActive: {

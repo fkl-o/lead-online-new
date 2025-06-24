@@ -191,13 +191,12 @@ export const updateLead = async (req, res, next) => {
         success: false,
         message: 'Nicht autorisiert, diesen Lead zu bearbeiten'
       });
-    }
-
-    lead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
+    }    lead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
     }).populate('user', 'name email')
-      .populate('assignedTo', 'name email');
+      .populate('assignedTo', 'name email')
+      .populate('communications.userId', 'name email');
 
     res.status(200).json({
       success: true,
@@ -337,9 +336,7 @@ export const addCommunication = async (req, res, next) => {
         success: false,
         message: 'Lead nicht gefunden'
       });
-    }
-
-    const communication = {
+    }    const communication = {
       ...req.body,
       userId: req.user.id,
       date: new Date()
@@ -347,10 +344,16 @@ export const addCommunication = async (req, res, next) => {
 
     await lead.addCommunication(communication);
 
+    // Re-fetch the lead with populated fields
+    const updatedLead = await Lead.findById(lead._id)
+      .populate('user', 'name email')
+      .populate('assignedTo', 'name email')
+      .populate('communications.userId', 'name email');
+
     res.status(200).json({
       success: true,
       message: 'Kommunikation hinzugefügt',
-      data: lead
+      data: updatedLead
     });
   } catch (error) {
     next(error);
@@ -582,5 +585,233 @@ export const getLeadActivities = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+// @desc    Upload attachment to lead via S3
+// @route   POST /api/leads/:id/attachments
+// @access  Private (Admin/User)
+export const uploadAttachment = async (req, res, next) => {
+  try {
+    const lead = await Lead.findById(req.params.id);
+
+    if (!lead) {
+      return res.status(404).json({
+        success: false,
+        message: 'Lead nicht gefunden'
+      });
+    }
+
+    // Check permissions
+    if (req.user.role !== 'admin' && 
+        lead.assignedTo?.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Nicht autorisiert, Dateien zu diesem Lead hinzuzufügen'
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Keine Datei hochgeladen'
+      });
+    }
+
+    // Add artificial delay in development to see upload progress
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Adding artificial delay for upload progress visibility...');
+      await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+    }
+
+    // Import S3 upload function
+    const { uploadToS3 } = await import('../config/upload.js');
+    
+    // Generate unique filename
+    const fileName = `leadgenpro-attachments/${Date.now()}-${Math.round(Math.random() * 1E9)}-${req.file.originalname}`;
+    
+    // Upload to S3
+    const s3Result = await uploadToS3(req.file, fileName);    // S3 Upload erfolgreich, erstelle Attachment
+    const attachment = {
+      filename: s3Result.Key,
+      originalName: req.file.originalname,
+      url: s3Result.Location,
+      fileSize: req.file.size,
+      mimeType: req.file.mimetype,
+      uploadedBy: req.user.id,
+      uploadedAt: new Date()
+    };
+
+    lead.attachments.push(attachment);
+    await lead.save();
+
+    // Re-fetch the lead with populated fields
+    const updatedLead = await Lead.findById(lead._id)
+      .populate('user', 'name email')
+      .populate('assignedTo', 'name email')
+      .populate('communications.userId', 'name email')
+      .populate('attachments.uploadedBy', 'name email');
+
+    res.status(200).json({
+      success: true,
+      message: 'Datei erfolgreich hochgeladen',
+      data: updatedLead
+    });
+  } catch (error) {
+    console.error('Upload error:', error.message);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Fehler beim Hochladen der Datei',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
+// @desc    Download attachment from S3
+// @route   GET /api/leads/:id/attachments/:attachmentId/download
+// @access  Private (Admin/User)
+export const downloadAttachment = async (req, res, next) => {
+  try {
+    const lead = await Lead.findById(req.params.id);
+
+    if (!lead) {
+      return res.status(404).json({
+        success: false,
+        message: 'Lead nicht gefunden'
+      });
+    }
+
+    // Check permissions
+    if (req.user.role !== 'admin' && 
+        lead.assignedTo?.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Nicht autorisiert, Dateien dieses Leads herunterzuladen'
+      });
+    }
+
+    // Find the attachment
+    const attachment = lead.attachments.id(req.params.attachmentId);
+    if (!attachment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Datei nicht gefunden'
+      });
+    }
+
+    // Import S3 client
+    const { s3 } = await import('../config/upload.js');
+    
+    // S3 download parameters
+    const downloadParams = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: attachment.filename
+    };
+
+    try {
+      // Get file from S3
+      const s3Object = await s3.getObject(downloadParams).promise();
+      
+      // Set proper headers for file download
+      res.setHeader('Content-Type', attachment.mimeType || 'application/octet-stream');
+      res.setHeader('Content-Disposition', `inline; filename="${attachment.originalName}"`);
+      res.setHeader('Content-Length', s3Object.ContentLength);
+      
+      // Send file buffer
+      res.send(s3Object.Body);
+      
+    } catch (s3Error) {
+      console.error('S3 Download Error:', s3Error);
+      return res.status(404).json({
+        success: false,
+        message: 'Datei konnte nicht von S3 abgerufen werden'
+      });
+    }
+
+  } catch (error) {
+    console.error('Download error:', error);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Fehler beim Herunterladen der Datei',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
+// @desc    Delete attachment from lead and S3
+// @route   DELETE /api/leads/:id/attachments/:attachmentId
+// @access  Private (Admin only)
+export const deleteAttachment = async (req, res, next) => {
+  try {
+    const lead = await Lead.findById(req.params.id);
+
+    if (!lead) {
+      return res.status(404).json({
+        success: false,
+        message: 'Lead nicht gefunden'
+      });
+    }
+
+    // Only admins can delete attachments
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Nur Administratoren können Dateien löschen'
+      });
+    }
+
+    // Find the attachment
+    const attachment = lead.attachments.id(req.params.attachmentId);
+    if (!attachment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Datei nicht gefunden'
+      });
+    }
+
+    // Import S3 client
+    const { s3 } = await import('../config/upload.js');
+    
+    // Delete from S3
+    const deleteParams = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: attachment.filename
+    };
+
+    try {
+      await s3.deleteObject(deleteParams).promise();
+      console.log(`File deleted from S3: ${attachment.filename}`);
+    } catch (s3Error) {
+      console.error('S3 Delete Error:', s3Error);
+      // Continue with database deletion even if S3 delete fails
+    }
+
+    // Remove from database
+    lead.attachments.pull(req.params.attachmentId);
+    await lead.save();
+
+    // Re-fetch the lead with populated fields
+    const updatedLead = await Lead.findById(lead._id)
+      .populate('user', 'name email')
+      .populate('assignedTo', 'name email')
+      .populate('communications.userId', 'name email')
+      .populate('attachments.uploadedBy', 'name email');
+
+    res.status(200).json({
+      success: true,
+      message: 'Datei erfolgreich gelöscht',
+      data: updatedLead
+    });
+
+  } catch (error) {
+    console.error('Delete attachment error:', error);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Fehler beim Löschen der Datei',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
   }
 };

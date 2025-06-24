@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Lead from '../models/Lead.js';
+import { validateUserCreation } from '../utils/validation.js';
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -83,25 +84,62 @@ export const getUser = async (req, res, next) => {
 // @access  Private (Admin only)
 export const createUser = async (req, res, next) => {
   try {
-    const { name, email, password, role, profile } = req.body;
+    const timestamp = new Date().toISOString();
+    console.log(`\n=== CREATE USER REQUEST ${timestamp} ===`);
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    console.log('Request headers:', req.headers.authorization ? 'Authorization present' : 'No authorization');
+    console.log('User agent:', req.headers['user-agent']?.slice(0, 50));
+    
+    // Check if request body is empty or malformed
+    if (!req.body || Object.keys(req.body).length === 0) {
+      console.log('❌ Empty request body!');
+      return res.status(400).json({
+        success: false,
+        message: 'Request body ist leer'
+      });
+    }
+    
+    // Validate input data
+    console.log('🔍 Starting validation...');
+    const { error, value } = validateUserCreation(req.body);
+    if (error) {
+      console.log('❌ Validation error:', error.details.map(d => `${d.path.join('.')}: ${d.message}`));
+      return res.status(400).json({
+        success: false,
+        message: 'Validierungsfehler',
+        errors: error.details.map(detail => detail.message)
+      });
+    }
 
+    console.log('✅ Validation passed');    console.log('📦 Validated data:', JSON.stringify(value, null, 2));
+
+    const { name, email, password, salutation, role, profile } = value;
+
+    console.log(`🔍 Checking if user exists: ${email}`);
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log(`❌ User already exists: ${email} (ID: ${existingUser._id})`);
       return res.status(400).json({
         success: false,
         message: 'Benutzer mit dieser E-Mail existiert bereits'
       });
     }
 
-    const user = await User.create({
+    console.log('✅ Email is unique, creating user...');
+    const userData = {
       name,
       email,
       password,
+      salutation,
       role,
       profile,
       isActive: true
-    });
+    };
+    console.log('👤 Creating user with data:', JSON.stringify(userData, null, 2));
+    
+    const user = await User.create(userData);
+    console.log(`🎉 User created successfully! ID: ${user._id}`);
 
     // Remove password from response
     user.password = undefined;
@@ -112,6 +150,8 @@ export const createUser = async (req, res, next) => {
       data: user
     });
   } catch (error) {
+    console.error('💥 Create user error:', error.message);
+    console.error('Stack:', error.stack);
     next(error);
   }
 };
@@ -192,6 +232,51 @@ export const deleteUser = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'Benutzer deaktiviert'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Permanently delete user (Hard delete)
+// @route   DELETE /api/users/:id/permanent
+// @access  Private (Admin only)
+export const permanentDeleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Benutzer nicht gefunden'
+      });
+    }
+
+    // Don't allow deleting the last admin
+    if (user.role === 'admin') {
+      const adminCount = await User.countDocuments({ role: 'admin' });
+      if (adminCount <= 1) {
+        return res.status(400).json({
+          success: false,
+          message: 'Der letzte Admin kann nicht gelöscht werden'
+        });
+      }
+    }
+
+    // Don't allow deleting yourself
+    if (user._id.toString() === req.user.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Sie können sich nicht selbst löschen'
+      });
+    }
+
+    // Hard delete - remove from database completely
+    await User.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Benutzer permanent gelöscht'
     });
   } catch (error) {
     next(error);

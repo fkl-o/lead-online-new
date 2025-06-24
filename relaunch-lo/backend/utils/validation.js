@@ -77,7 +77,46 @@ export const userRegistrationSchema = Joi.object({
   name: Joi.string().trim().min(2).max(50).required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
-  role: Joi.string().valid('user', 'admin').default('user')
+  role: Joi.string().valid('admin', 'vertrieb', 'kunde', 'lead').default('lead')
+});
+
+// User creation validation schema (for admin creating users)
+export const userCreationSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(50).required().messages({
+    'string.empty': 'Name ist erforderlich',
+    'string.min': 'Name muss mindestens 2 Zeichen lang sein',
+    'string.max': 'Name darf nicht länger als 50 Zeichen sein'
+  }),
+  
+  email: Joi.string().email().required().messages({
+    'string.email': 'Bitte geben Sie eine gültige E-Mail-Adresse ein',
+    'string.empty': 'E-Mail ist erforderlich'
+  }),
+  
+  password: Joi.string().min(6).required().messages({
+    'string.min': 'Passwort muss mindestens 6 Zeichen lang sein',
+    'string.empty': 'Passwort ist erforderlich'
+  }),
+  
+  salutation: Joi.string().valid('herr', 'frau').optional().messages({
+    'any.only': 'Anrede muss "herr" oder "frau" sein'
+  }),
+  
+  role: Joi.string().valid('admin', 'vertrieb', 'kunde', 'lead').default('lead').messages({
+    'any.only': 'Rolle muss admin, vertrieb, kunde oder lead sein'
+  }),
+  
+  profile: Joi.object({
+    company: Joi.string().trim().max(200).allow(''),
+    companyUrl: Joi.string().uri().allow('').messages({
+      'string.uri': 'Bitte geben Sie eine gültige URL ein'
+    }),
+    phone: Joi.string().pattern(/^[\+]?[0-9\s\-\(\)]{7,20}$/).allow('').messages({
+      'string.pattern.base': 'Bitte geben Sie eine gültige Telefonnummer ein'
+    }),
+    department: Joi.string().trim().max(100).allow(''),
+    position: Joi.string().trim().max(100).allow('')
+  }).default({})
 });
 
 // User login validation schema
@@ -93,6 +132,10 @@ export const validateLeadData = (data) => {
 
 export const validateUserRegistration = (data) => {
   return userRegistrationSchema.validate(data, { abortEarly: false });
+};
+
+export const validateUserCreation = (data) => {
+  return userCreationSchema.validate(data, { abortEarly: false });
 };
 
 export const validateUserLogin = (data) => {
