@@ -1,15 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { leadApi, authApi } from '@/lib/api';
 
-// Components
+// Core components - always loaded
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
-import Overview from './components/Overview';
-import StatsCards from './components/StatsCards';
-import LeadsTable from './components/LeadsTable';
-import LeadEditModal from './components/LeadEditModal';
-import UserManagement from './components/UserManagement';
 import { LoadingState, ErrorState } from './components/LoadingAndErrorStates';
+
+// Lazy load heavy dashboard components
+const Overview = lazy(() => import('./components/Overview'));
+const StatsCards = lazy(() => import('./components/StatsCards'));
+const LeadsTable = lazy(() => import('./components/LeadsTable'));
+const LeadEditModal = lazy(() => import('./components/LeadEditModal'));
+const UserManagement = lazy(() => import('./components/UserManagement'));
+const CompanyManagement = lazy(() => import('./components/CompanyManagement'));
 
 // Types
 interface User {
@@ -92,16 +95,13 @@ const Dashboard = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Lead>>({});
   const [currentView, setCurrentView] = useState('overview');
-
   useEffect(() => {
-    // Check if user is logged in
+    // Authentication is already verified by ProtectedRoute
+    // Just get user from localStorage and load data
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
       loadDashboardData();
-    } else {
-      setError('Bitte loggen Sie sich ein, um das Dashboard zu sehen.');
-      setLoading(false);
     }
   }, []);
 
@@ -213,24 +213,42 @@ const Dashboard = () => {
     setLeads([]);
     setStats(null);
     setError('Sie wurden ausgeloggt.');
-  };
-  const renderCurrentView = () => {
+  };  const renderCurrentView = () => {
+    const ComponentWrapper = ({ children }: { children: React.ReactNode }) => (
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      }>
+        {children}
+      </Suspense>
+    );
+
     switch (currentView) {
       case 'overview':
-        return <Overview stats={stats || { totalLeads: 0 }} user={user} />;
+        return (
+          <ComponentWrapper>
+            <Overview stats={stats || { totalLeads: 0 }} user={user} />
+          </ComponentWrapper>
+        );
       case 'leads':
         return (
-          <div className="space-y-6">
-            {stats && <StatsCards stats={stats} />}
-            <LeadsTable 
-              leads={leads}
-              onEditLead={handleEditLead}
-              onStatusUpdate={handleStatusUpdate}
-            />
-          </div>
-        );      case 'users':
+          <ComponentWrapper>
+            <div className="space-y-6">
+              {stats && <StatsCards stats={stats} />}
+              <LeadsTable 
+                leads={leads}
+                onEditLead={handleEditLead}
+                onStatusUpdate={handleStatusUpdate}
+              />
+            </div>
+          </ComponentWrapper>
+        );
+      case 'users':
         return user?.role === 'admin' ? (
-          <UserManagement currentUser={user} />
+          <ComponentWrapper>
+            <UserManagement currentUser={user} />
+          </ComponentWrapper>
         ) : (
           <div className="flex items-center justify-center h-96">
             <div className="text-center">
@@ -245,6 +263,12 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
+        );
+      case 'companies':
+        return (
+          <ComponentWrapper>
+            <CompanyManagement currentUser={user} />
+          </ComponentWrapper>
         );
       default:
         // Für alle anderen Views (die disabled sind)
@@ -295,18 +319,18 @@ const Dashboard = () => {
         <main className="flex-1 p-6 overflow-auto">
           {renderCurrentView()}
         </main>
-      </div>
-
-      {/* Lead Edit Modal */}
-      <LeadEditModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        selectedLead={selectedLead}
-        editForm={editForm}
-        onFormChange={handleFormChange}
-        onSave={handleSaveLead}
-        onAddComment={handleAddComment}
-      />
+      </div>      {/* Lead Edit Modal */}
+      <Suspense fallback={null}>
+        <LeadEditModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          selectedLead={selectedLead}
+          editForm={editForm}
+          onFormChange={handleFormChange}
+          onSave={handleSaveLead}
+          onAddComment={handleAddComment}
+        />
+      </Suspense>
     </div>
   );
 };

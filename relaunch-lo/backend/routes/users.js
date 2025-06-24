@@ -7,7 +7,8 @@ import {
   updateUser,
   deleteUser,
   permanentDeleteUser,
-  getUserStats
+  getUserStats,
+  resetPassword
 } from '../controllers/users.js';
 
 const router = express.Router();
@@ -27,6 +28,9 @@ router.route('/:id')
   .get(getUser)
   .put(updateUser)
   .delete(deleteUser);
+
+router.route('/:id/reset-password')
+  .post(resetPassword);
 
 router.route('/:id/permanent')
   .delete(permanentDeleteUser);

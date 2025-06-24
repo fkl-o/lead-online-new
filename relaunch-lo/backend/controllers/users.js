@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Lead from '../models/Lead.js';
+import bcrypt from 'bcryptjs';
 import { validateUserCreation } from '../utils/validation.js';
 
 // @desc    Get all users
@@ -356,5 +357,57 @@ export const getUserStats = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+// @desc    Reset user password
+// @route   POST /api/users/:id/reset-password
+// @access  Private (Admin only)
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Passwort ist erforderlich'
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Passwort muss mindestens 6 Zeichen lang sein'
+      });
+    }    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Benutzer nicht gefunden'
+      });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update only the password field to avoid validation issues
+    await User.findByIdAndUpdate(
+      req.params.id,
+      { password: hashedPassword },
+      { runValidators: false } // Skip validation to avoid enum issues
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Passwort erfolgreich zurückgesetzt'
+    });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Fehler beim Zurücksetzen des Passworts'
+    });
   }
 };

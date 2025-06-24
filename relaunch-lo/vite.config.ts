@@ -14,12 +14,24 @@ export default defineConfig({
     },
   },
   build: {
+    target: 'esnext',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
           // Vendor libraries
           vendor: ['react', 'react-dom'],
           'react-router': ['react-router-dom'],
+          
+          // Dashboard - separate chunk for lazy loading
+          dashboard: [
+            './src/pages/Dashboard/index.tsx',
+            './src/pages/Dashboard/components/Overview.tsx',
+            './src/pages/Dashboard/components/StatsCards.tsx',
+            './src/pages/Dashboard/components/LeadsTable.tsx',
+            './src/pages/Dashboard/components/UserManagement.tsx',
+            './src/pages/Dashboard/components/CompanyManagement.tsx'
+          ],
           
           // UI libraries
           'radix-ui': [

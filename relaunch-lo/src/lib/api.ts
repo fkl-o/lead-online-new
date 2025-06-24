@@ -3,6 +3,16 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://relaunch-lo-backend.onrender.com/api'
   : 'http://localhost:5000/api';
 
+// Cache for user data to avoid repeated API calls
+const userCache = {
+  data: null as any,
+  timestamp: 0,
+  TTL: 5 * 60 * 1000 // 5 minutes
+};
+
+// Request queue to prevent duplicate requests
+const requestQueue = new Map();
+
 // Types
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -82,6 +92,12 @@ const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any
     },
   };
 
+  // Check request queue
+  const requestKey = `${finalOptions.method}-${url}`;
+  if (requestQueue.has(requestKey)) {
+    return requestQueue.get(requestKey);
+  }
+
   try {
     const response = await fetch(url, finalOptions);
     const data = await response.json();
@@ -90,10 +106,18 @@ const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any
       throw new Error(data.message || 'API call failed');
     }
 
+    // Cache user data
+    if (endpoint === '/auth/me' && data.success) {
+      userCache.data = data.data;
+      userCache.timestamp = Date.now();
+    }
+
     return data;
   } catch (error) {
     console.error('API Error:', error);
     throw error;
+  } finally {
+    requestQueue.delete(requestKey);
   }
 };
 
@@ -212,16 +236,35 @@ export const authApi = {
     
     return response;
   },
-
   // Get current user
   getMe: async (): Promise<ApiResponse> => {
-    return apiCall('/auth/me');
+    // Check cache first
+    const now = Date.now();
+    if (userCache.data && (now - userCache.timestamp) < userCache.TTL) {
+      return {
+        success: true,
+        data: userCache.data
+      };
+    }
+
+    // If cache is stale or empty, make API call
+    const response = await apiCall('/auth/me');
+    
+    // Update cache on successful response
+    if (response.success) {
+      userCache.data = response.data;
+      userCache.timestamp = now;
+    }
+    
+    return response;
   },
 
   // Logout
   logout: (): void => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    userCache.data = null;
+    userCache.timestamp = 0;
   },
 };
 

@@ -1,21 +1,37 @@
 // PFAD: src/main.tsx
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 
-// Static imports for all components to avoid lazy loading issues
+// Performance optimization
+import { registerSW } from './lib/serviceWorker';
+
+// Static imports for core components
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import WebentwicklungLayout from './pages/Webentwicklung/WebentwicklungLayout';
 import MarketingAutomationLayout from './pages/MarketingAutomation/MarketingAutomationLayout';
 import DigitalizationLayout from './pages/Digitalization/DigitalizationLayout';
 import LoginPage from './pages/LoginPage';
 import ContactPage from './pages/ContactPage';
-import Dashboard from './pages/Dashboard';
 import TestPage from './pages/TestPage';
+
+// Lazy load dashboard components to improve initial page load
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+
+// Loading component for Suspense fallback
+const LoadingSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <p className="mt-4 text-gray-600">Dashboard wird geladen...</p>
+    </div>
+  </div>
+);
 
 
 const router = createBrowserRouter([
@@ -49,7 +65,13 @@ const router = createBrowserRouter([
     element: <LoginPage />
   },  { 
     path: '/dashboard', 
-    element: <Dashboard />
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Dashboard />
+        </Suspense>
+      </ProtectedRoute>
+    )
   },
   { 
     path: '/test', 
@@ -69,3 +91,6 @@ ReactDOM.createRoot(rootElement).render(
     </HelmetProvider>
   </React.StrictMode>
 );
+
+// Register service worker for performance optimization
+registerSW();

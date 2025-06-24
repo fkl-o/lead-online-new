@@ -1,17 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { authApi } from '../../lib/api';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get the intended destination or default to dashboard
+  const from = (location.state as any)?.from?.pathname || '/dashboard';
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('user');
+    
+    if (token && user) {
+      // User is already logged in, redirect them
+      navigate(from, { replace: true });
+    }
+  }, [navigate, from]);
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -19,11 +34,10 @@ const LoginPage: React.FC = () => {
 
     try {
       const response = await authApi.login({ email, password });
-      
-      if (response.success) {
+        if (response.success) {
         setMessage('Login erfolgreich! Sie werden weitergeleitet...');
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate(from, { replace: true });
         }, 1000);
       } else {
         setMessage(response.message || 'Login fehlgeschlagen');

@@ -48,8 +48,9 @@ const menuItems: MenuSection[] = [
   {
     section: 'Dashboard',
     items: [
-      { id: 'overview', label: 'Übersicht', icon: Home, badge: null },
+      { id: 'overview', label: 'Übersicht', icon: Home },
       { id: 'leads', label: 'Leads', icon: Target, badge: 'active' },
+      { id: 'companies', label: 'Unternehmen', icon: Building2 },
     ]
   },
   {
@@ -58,15 +59,13 @@ const menuItems: MenuSection[] = [
       { id: 'users', label: 'Benutzer', icon: Users, badge: null, adminOnly: true },
     ]
   },
-  {
-    section: 'In Entwicklung',
+  {    section: 'In Entwicklung',
     items: [
       { id: 'analytics', label: 'Analytics', icon: BarChart3, badge: null, disabled: true },
       { id: 'reports', label: 'Berichte', icon: PieChart, badge: null, disabled: true },
       { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, badge: null, disabled: true },
       { id: 'activities', label: 'Aktivitäten', icon: Activity, badge: null, disabled: true },
       { id: 'calendar', label: 'Kalender', icon: Calendar, badge: null, disabled: true },
-      { id: 'companies', label: 'Unternehmen', icon: Building2, badge: null, disabled: true },
       { id: 'communications', label: 'Kommunikation', icon: MessageSquare, badge: null, disabled: true },
       { id: 'documents', label: 'Dokumente', icon: FileText, badge: null, disabled: true },
       { id: 'workflows', label: 'Workflows', icon: Workflow, badge: null, disabled: true, adminOnly: true },

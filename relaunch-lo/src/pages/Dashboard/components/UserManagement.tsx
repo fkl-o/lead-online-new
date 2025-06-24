@@ -101,7 +101,10 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);// Form states
+  const [isPasswordResetModalOpen, setIsPasswordResetModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');// Form states
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -386,6 +389,44 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       case 'lead': return 'Lead';
       default: return role;
     }
+  };
+
+  const handleResetPassword = async () => {
+    if (!selectedUser) return;
+
+    if (newPassword !== confirmPassword) {
+      alert('Die Passwörter stimmen nicht überein!');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      alert('Das Passwort muss mindestens 6 Zeichen lang sein!');
+      return;
+    }
+
+    try {
+      const response = await userApi.resetPassword(selectedUser._id, newPassword);
+
+      if (response.success) {
+        alert('Passwort erfolgreich zurückgesetzt!');
+        setIsPasswordResetModalOpen(false);
+        setSelectedUser(null);
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        alert(response.message || 'Fehler beim Zurücksetzen des Passworts');
+      }
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      alert('Fehler beim Zurücksetzen des Passworts');
+    }
+  };
+
+  const openPasswordResetModal = (user: User) => {
+    setSelectedUser(user);
+    setNewPassword('');
+    setConfirmPassword('');
+    setIsPasswordResetModalOpen(true);
   };
 
   if (!isAdmin) {
@@ -1115,8 +1156,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
               <Button
                 onClick={() => {
                   setIsActionsModalOpen(false);
-                  // TODO: Implement password reset functionality
-                  alert('Passwort-Reset-Funktion wird implementiert');
+                  openPasswordResetModal(selectedUser);
                 }}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white h-12 flex items-center justify-start gap-3 px-4"
               >
@@ -1180,6 +1220,88 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                   <span>{new Date(selectedUser.createdAt).toLocaleDateString('de-DE')}</span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Passwort zurücksetzen Modal */}
+      {isPasswordResetModalOpen && (
+        <div
+          onClick={() => setIsPasswordResetModalOpen(false)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 transition-opacity duration-300"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full flex flex-col overflow-hidden max-h-[90vh] transform transition-all duration-300"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-2">
+                <Shield className="h-6 w-6 text-brand-600" />
+                <h3 className="text-xl md:text-2xl font-bold text-neutral-900">
+                  Passwort zurücksetzen
+                </h3>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsPasswordResetModalOpen(false)} 
+                className="rounded-full"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="new-password" className="font-semibold text-slate-700 block mb-2">
+                  Neues Passwort
+                </Label>
+                <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
+                  <Input
+                    id="new-password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Neues sicheres Passwort"
+                    className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="confirm-password" className="font-semibold text-slate-700 block mb-2">
+                  Passwort bestätigen
+                </Label>
+                <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Passwort bestätigen"
+                    className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsPasswordResetModalOpen(false)}
+                className="px-6 py-2"
+              >
+                Abbrechen
+              </Button>
+              <Button 
+                onClick={handleResetPassword} 
+                className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2"
+                disabled={!newPassword || !confirmPassword}
+              >
+                Passwort zurücksetzen
+              </Button>
             </div>
           </div>
         </div>
