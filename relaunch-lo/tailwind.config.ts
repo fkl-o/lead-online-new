@@ -7,13 +7,20 @@ export default {
       colors: {
         // Brand colors from HTML prototype
         brand: {
+          '50': '#fef2f2',
+          '100': '#fee2e2',
+          '200': '#fecaca',
           '600': '#be123c', // Primary Accent (Red) for main CTAs
           '700': '#9f1239', // Hover
+          '800': '#881337',
         },
         // Secondary colors from HTML prototype  
         secondary: {
+          '50': '#f8fafc',
+          '100': '#f1f5f9',
           '600': '#060b23', // Secondary Accent (Dark Blue)
           '700': '#1a203c', // Hover
+          '800': '#1e293b',
         },
         // Neutral colors from HTML prototype
         neutral: {

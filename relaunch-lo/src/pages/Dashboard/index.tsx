@@ -15,6 +15,7 @@ const LeadEditModal = lazy(() => import('./components/LeadEditModal'));
 const UserManagement = lazy(() => import('./components/UserManagement'));
 const CompanyManagement = lazy(() => import('./components/CompanyManagement'));
 const AccountModal = lazy(() => import('./components/AccountModal'));
+const CustomerView = lazy(() => import('./components/CustomerView'));
 
 // Types
 interface User {
@@ -114,6 +115,7 @@ const Dashboard = () => {
   const [editForm, setEditForm] = useState<Partial<Lead>>({});
   const [currentView, setCurrentView] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -121,16 +123,35 @@ const Dashboard = () => {
     // Just get user from localStorage and load data
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      loadDashboardData();
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+      
+      // Für Kunden setze die Standard-Ansicht auf ihre Anfragen
+      if (userData.role === 'kunde') {
+        setCurrentView('customer-requests');
+      }
+      
+      loadDashboardData(userData);
     }
   }, []);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (userData?: any) => {
     try {
       setLoading(true);
       
-      // Load leads, stats and activities in parallel
+      // Verwende entweder den übergebenen userData oder den state user
+      const currentUser = userData || user;
+      
+      // Für Kunden laden wir nur ihre eigenen Leads
+      if (currentUser?.role === 'kunde') {
+        const leadsResponse = await leadApi.getLeads();
+        if (leadsResponse.success) {
+          setLeads(leadsResponse.data);
+        }
+        return;
+      }
+      
+      // Load leads, stats and activities in parallel für Admin/Vertrieb
       const [leadsResponse, statsResponse, activitiesResponse] = await Promise.all([
         leadApi.getLeads(),
         leadApi.getLeadStats(),
@@ -257,6 +278,14 @@ const Dashboard = () => {
     setLeads([]);
     setStats(null);
     setError('Sie wurden ausgeloggt.');
+  };
+
+  const handleToggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleCloseMobileMenu = () => {
+    setIsMobileMenuOpen(false);
   };  const renderCurrentView = () => {
     const ComponentWrapper = ({ children }: { children: React.ReactNode }) => (
       <Suspense fallback={
@@ -268,6 +297,33 @@ const Dashboard = () => {
       </Suspense>
     );
 
+    // Spezielle Ansicht für Kunden
+    if (user?.role === 'kunde') {
+      switch (currentView) {
+        case 'customer-requests':
+          return (
+            <ComponentWrapper>
+              <CustomerView 
+                user={user} 
+                leads={leads} 
+                onEditLead={handleEditLead}
+              />
+            </ComponentWrapper>
+          );
+        default:
+          return (
+            <ComponentWrapper>
+              <CustomerView 
+                user={user} 
+                leads={leads} 
+                onEditLead={handleEditLead}
+              />
+            </ComponentWrapper>
+          );
+      }
+    }
+
+    // Standard Dashboard für Admin/Vertrieb
     switch (currentView) {
       case 'overview':
         return (
@@ -349,20 +405,23 @@ const Dashboard = () => {
         onViewChange={setCurrentView}
         user={user}
         onCollapseChange={setSidebarCollapsed}
+        isMobileMenuOpen={isMobileMenuOpen}
+        onMobileMenuClose={handleCloseMobileMenu}
       />
 
       {/* Main Content with dynamic left margin to account for fixed sidebar */}
-      <div className={`flex flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+      <div className={`flex flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Top Bar */}
         <TopBar
           user={user}
           currentView={currentView}
           onLogout={handleLogout}
           onOpenAccountModal={handleOpenAccountModal}
+          onToggleMobileMenu={handleToggleMobileMenu}
         />
 
         {/* Content Area */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-4 lg:p-6 overflow-auto">
           {renderCurrentView()}
         </main>
       </div>      {/* Lead Edit Modal */}

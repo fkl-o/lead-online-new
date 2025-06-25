@@ -8,7 +8,8 @@ import {
   Users,
   Building2,
   Target,
-  Home
+  Home,
+  Menu
 } from 'lucide-react';
 
 interface TopBarProps {
@@ -16,14 +17,16 @@ interface TopBarProps {
   currentView: string;
   onLogout: () => void;
   onOpenAccountModal: () => void;
+  onToggleMobileMenu?: () => void;
 }
 
-const getViewTitle = (view: string) => {
+const getViewTitle = (view: string, userRole?: string) => {
   const titles: Record<string, { title: string; icon: any }> = {
     overview: { title: 'Dashboard Übersicht', icon: Home },
     leads: { title: 'Lead-Management', icon: Target },
     companies: { title: 'Unternehmens-Verwaltung', icon: Building2 },
     users: { title: 'Benutzer-Verwaltung', icon: Users },
+    'customer-requests': { title: 'Meine Anfragen', icon: Target },
     pipeline: { title: 'Sales Pipeline', icon: Target },
     activities: { title: 'Aktivitäten', icon: Target },
     calendar: { title: 'Kalender', icon: Target },
@@ -35,12 +38,18 @@ const getViewTitle = (view: string) => {
     notifications: { title: 'Benachrichtigungen', icon: Target },
     settings: { title: 'Einstellungen', icon: Target },
   };
+  
+  // Spezielle Behandlung für Kunden
+  if (userRole === 'kunde') {
+    return titles['customer-requests'] || { title: 'Mein Bereich', icon: Home };
+  }
+  
   return titles[view] || { title: 'Dashboard', icon: Home };
 };
 
-const TopBar = ({ user, currentView, onLogout, onOpenAccountModal }: TopBarProps) => {
+const TopBar = ({ user, currentView, onLogout, onOpenAccountModal, onToggleMobileMenu }: TopBarProps) => {
   const navigate = useNavigate();
-  const { title, icon: ViewIcon } = getViewTitle(currentView);
+  const { title, icon: ViewIcon } = getViewTitle(currentView, user?.role);
 
   const handleLogout = () => {
     onLogout();
@@ -73,13 +82,23 @@ const TopBar = ({ user, currentView, onLogout, onOpenAccountModal }: TopBarProps
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
-      {/* Left Side - Page Title */}
+    <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4 flex items-center justify-between shadow-sm">
+      {/* Left Side - Mobile Menu Button + Page Title */}
       <div className="flex items-center space-x-3">
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleMobileMenu}
+          className="h-10 w-10 lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        
         <div className="bg-gradient-to-r from-brand-600 to-secondary-600 p-2 rounded-lg">
           <ViewIcon className="h-5 w-5 text-white" />
         </div>
-        <div>
+        <div className="hidden sm:block">
           <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
           <p className="text-sm text-gray-500">
             Willkommen zurück, {user?.name}
@@ -88,9 +107,9 @@ const TopBar = ({ user, currentView, onLogout, onOpenAccountModal }: TopBarProps
       </div>
 
       {/* Right Side - User Actions */}
-      <div className="flex items-center space-x-4">
-        {/* User Info */}
-        <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 lg:space-x-4">
+        {/* User Info - Hidden on small screens */}
+        <div className="hidden md:flex items-center space-x-3">
           <div className="text-right">
             <div className="flex items-center space-x-1">
               <span className="text-sm font-medium text-gray-900">
@@ -116,16 +135,25 @@ const TopBar = ({ user, currentView, onLogout, onOpenAccountModal }: TopBarProps
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 lg:space-x-2">
+          {/* Mobile: Show only Avatar + Settings on very small screens */}
+          <div className="flex items-center space-x-2 md:hidden">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-gradient-to-r from-brand-600 to-secondary-600 text-white font-semibold text-xs">
+                {getUserInitials(user?.name)}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+          
           {/* User Settings Button */}
           <Button
             variant="outline"
             size="icon"
             onClick={onOpenAccountModal}
-            className="h-10 w-10 rounded-full border-gray-300 hover:bg-gray-50"
+            className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border-gray-300 hover:bg-gray-50"
             title="Benutzer-Einstellungen"
           >
-            <Settings className="h-4 w-4" />
+            <Settings className="h-3 w-3 lg:h-4 lg:w-4" />
           </Button>
 
           {/* Logout Button */}
@@ -133,10 +161,10 @@ const TopBar = ({ user, currentView, onLogout, onOpenAccountModal }: TopBarProps
             variant="outline"
             size="icon"
             onClick={handleLogout}
-            className="h-10 w-10 rounded-full border-gray-300 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+            className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border-gray-300 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
             title="Abmelden"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-3 w-3 lg:h-4 lg:w-4" />
           </Button>
         </div>
       </div>

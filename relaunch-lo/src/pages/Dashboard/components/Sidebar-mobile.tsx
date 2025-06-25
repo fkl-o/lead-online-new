@@ -48,23 +48,12 @@ interface SidebarProps {
   onMobileMenuClose?: () => void;
 }
 
-// Menü für Kunden - nur das Wesentliche
-const customerMenuItems: MenuSection[] = [
-  {
-    section: 'Mein Bereich',
-    items: [
-      { id: 'customer-requests', label: 'Meine Anfragen', icon: MessageSquare, badge: 'active' },
-    ]
-  }
-];
-
-// Vollständiges Menü für Admin und Vertrieb
-const fullMenuItems: MenuSection[] = [
+const menuItems: MenuSection[] = [
   {
     section: 'Dashboard',
     items: [
       { id: 'overview', label: 'Übersicht', icon: Home },
-      { id: 'leads', label: 'Lead-Management', icon: Target, badge: 'active' },
+      { id: 'leads', label: 'Leads', icon: Target, badge: 'active' },
       { id: 'companies', label: 'Unternehmen', icon: Building2 },
     ]
   },
@@ -95,10 +84,6 @@ const Sidebar = ({ currentView, onViewChange, user, className, onCollapseChange,
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const isAdmin = user?.role === 'admin';
-  const isCustomer = user?.role === 'kunde';
-
-  // Wähle das passende Menü basierend auf der Benutzerrolle
-  const menuItems = isCustomer ? customerMenuItems : fullMenuItems;
 
   const handleBackToWebsite = () => {
     navigate('/');
@@ -120,23 +105,21 @@ const Sidebar = ({ currentView, onViewChange, user, className, onCollapseChange,
   return (
     <>
       {/* Mobile Overlay */}
-      <div 
-        className={cn(
-          "fixed inset-0 bg-black z-40 lg:hidden transition-opacity duration-300",
-          isMobileMenuOpen ? "opacity-50" : "opacity-0 pointer-events-none"
-        )}
-        onClick={onMobileMenuClose}
-      />
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" 
+          onClick={onMobileMenuClose}
+        />
+      )}
       
       {/* Sidebar */}
       <div className={cn(
-        "bg-white border-r border-gray-200 flex flex-col shadow-lg h-screen z-50",
-        // Desktop positioning and transitions
-        "lg:fixed lg:left-0 lg:top-0 lg:transition-all lg:duration-300",
+        "bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-sm h-screen z-50",
+        // Desktop positioning
+        "hidden lg:flex lg:fixed lg:left-0 lg:top-0",
         collapsed ? "lg:w-16" : "lg:w-64",
-        // Mobile positioning with smooth slide animation
-        "fixed left-0 top-0 w-64 transition-transform duration-300 ease-out lg:transform-none",
-        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        // Mobile positioning
+        isMobileMenuOpen ? "fixed left-0 top-0 w-64 flex" : "hidden lg:flex",
         className
       )}>
         {/* Header */}
