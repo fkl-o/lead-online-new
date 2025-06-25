@@ -16,6 +16,7 @@ import {
   Megaphone,
   Euro
 } from "lucide-react";
+import { useSnackbar } from '@/components/ui/snackbar';
 
 // Einheitlicher Button-Style
 const buttonStyle = "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600/100 data-[state=on]:shadow-[0_0_0_2px_#be123c] transition-all duration-200 ease-in-out";
@@ -59,6 +60,7 @@ const SelectableButton = ({ icon, label, value, isSelected, onClick, isRadio, na
 );
 
 const DigitalizationModal = ({ open, onClose }: ModalProps) => {
+  const { showSnackbar } = useSnackbar();
   const [isMounted, setIsMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -111,13 +113,13 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url) return alert("Bitte geben Sie Ihre Unternehmens-URL ein.");
-    if (areas.length === 0) return alert("Bitte wählen Sie mindestens einen Bereich aus.");
-    if (!salutation) return alert("Bitte wählen Sie eine Anrede aus.");
-    if (!name) return alert("Bitte geben Sie Ihren Namen ein.");
-    if (!email) return alert("Bitte geben Sie Ihre E-Mail-Adresse ein.");
-    if (!privacyAgreed) return alert("Bitte stimmen Sie den Datenschutzhinweisen zu.");
-    alert("Digitalisierungs-Anfrage abgeschickt!");
+    if (!url) return showSnackbar("Bitte geben Sie Ihre Unternehmens-URL ein.", 'error');
+    if (areas.length === 0) return showSnackbar("Bitte wählen Sie mindestens einen Bereich aus.", 'error');
+    if (!salutation) return showSnackbar("Bitte wählen Sie eine Anrede aus.", 'error');
+    if (!name) return showSnackbar("Bitte geben Sie Ihren Namen ein.", 'error');
+    if (!email) return showSnackbar("Bitte geben Sie Ihre E-Mail-Adresse ein.", 'error');
+    if (!privacyAgreed) return showSnackbar("Bitte stimmen Sie den Datenschutzhinweisen zu.", 'error');
+    showSnackbar("Digitalisierungs-Anfrage abgeschickt!", 'success');
     handleClose();
   };
 
@@ -280,7 +282,6 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
               <div className="flex items-start space-x-3 bg-rose-50 p-3 rounded-lg border border-brand-600/20">
                 <Checkbox
                   id="privacy"
-                  checked={privacyAgreed}
                   onCheckedChange={(checked) => setPrivacyAgreed(!!checked)}
                   required
                   className="h-5 w-5 mt-0.5"

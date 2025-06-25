@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
   Users, 
@@ -13,10 +12,8 @@ import {
   Star,
   ArrowUpRight,
   MoreHorizontal,
-  Plus,
-  Eye
+  Plus
 } from 'lucide-react';
-import { Line, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface Stats {
   totalLeads: number;
@@ -27,29 +24,27 @@ interface Stats {
   };
 }
 
+interface Activity {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  time: string;
+  priority: string;
+  leadId?: string;
+  user?: {
+    _id: string;
+    name: string;
+  };
+}
+
 interface OverviewProps {
   stats: Stats;
   user: any;
+  activities: Activity[];
 }
 
-// Mock data for charts
-const revenueData = [
-  { month: 'Jan', revenue: 4000, leads: 240, target: 4500 },
-  { month: 'Feb', revenue: 3000, leads: 198, target: 4500 },
-  { month: 'Mar', revenue: 5000, leads: 300, target: 4500 },
-  { month: 'Apr', revenue: 4500, leads: 278, target: 4500 },
-  { month: 'Mai', revenue: 6000, leads: 345, target: 4500 },
-  { month: 'Jun', revenue: 5500, leads: 312, target: 4500 },
-];
-
-const leadSourceData = [
-  { name: 'Website', value: 400, color: '#be123c' },
-  { name: 'E-Mail Marketing', value: 300, color: '#060b23' },
-  { name: 'Social Media', value: 200, color: '#3b82f6' },
-  { name: 'Empfehlungen', value: 150, color: '#10b981' },
-  { name: 'Sonstige', value: 100, color: '#8b5cf6' },
-];
-
+// Mock data only for demo purposes - will be replaced with real data
 const recentActivities = [
   {
     id: 1,
@@ -85,36 +80,15 @@ const recentActivities = [
   }
 ];
 
-const upcomingTasks = [
-  {
-    id: 1,
-    title: 'Follow-up Call mit TechStart GmbH',
-    time: '14:00',
-    type: 'call',
-    priority: 'high'
-  },
-  {
-    id: 2,
-    title: 'Proposal für Digital Solutions',
-    time: '16:30',
-    type: 'document',
-    priority: 'medium'
-  },
-  {
-    id: 3,
-    title: 'Team Meeting - Wochenbericht',
-    time: '17:00',
-    type: 'meeting',
-    priority: 'low'
-  }
-];
-
-const Overview = ({ stats, user }: OverviewProps) => {
+const Overview = ({ stats, user, activities }: OverviewProps) => {
   const conversion = stats?.conversionStats?.conversionRate || 0;
   const totalValue = stats?.conversionStats?.totalValue || 0;
   
   // Calculate additional metrics
   const activeLeads = stats?.statusStats?.find(s => ['new', 'contacted', 'qualified'].includes(s._id))?.count || 0;
+
+  // Use real activities if available, otherwise fallback to mock data for empty states
+  const displayActivities = activities.length > 0 ? activities : recentActivities;
   
   return (
     <div className="space-y-6">      {/* Welcome Section */}
@@ -211,93 +185,17 @@ const Overview = ({ stats, user }: OverviewProps) => {
               <span className="text-sm text-gray-500">Benötigen Aufmerksamkeit</span>
             </div>
           </CardContent>
-        </Card>
-      </div>
+        </Card>      </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Chart */}
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold">Umsatz & Leads</CardTitle>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">30T</Button>
-                <Button variant="outline" size="sm">90T</Button>
-                <Button variant="default" size="sm">6M</Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={revenueData}>
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#be123c" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#be123c" stopOpacity={0.1}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value, name) => [
-                    name === 'revenue' ? `€${value?.toLocaleString()}` : value,
-                    name === 'revenue' ? 'Umsatz' : name === 'leads' ? 'Leads' : 'Ziel'
-                  ]}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="#be123c" fillOpacity={1} fill="url(#colorRevenue)" />
-                <Line type="monotone" dataKey="target" stroke="#94a3b8" strokeDasharray="5 5" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Lead Sources */}
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">Lead Quellen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={leadSourceData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={120}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {leadSourceData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Activity and Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activities */}
-        <Card className="lg:col-span-2 border-0 shadow-md">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold">Letzte Aktivitäten</CardTitle>
-              <Button variant="ghost" size="sm">
-                <Eye className="h-4 w-4 mr-2" />
-                Alle anzeigen
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
+      {/* Recent Activities */}
+      <Card className="border-0 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Letzte Aktivitäten</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {displayActivities.length > 0 ? (
+              displayActivities.map((activity) => (
                 <div key={activity.id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className={`w-2 h-2 rounded-full ${
                     activity.priority === 'high' ? 'bg-red-500' :
@@ -309,39 +207,21 @@ const Overview = ({ stats, user }: OverviewProps) => {
                       <span className="text-sm text-gray-500">{activity.time}</span>
                     </div>
                     <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
+                    {(activity as Activity).user && (
+                      <p className="text-xs text-gray-500 mt-1">von {(activity as Activity).user!.name}</p>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Upcoming Tasks */}
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">Anstehende Aufgaben</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {upcomingTasks.map((task) => (
-                <div key={task.id} className="p-3 border border-gray-200 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant={task.priority === 'high' ? 'destructive' : task.priority === 'medium' ? 'default' : 'secondary'}>
-                      {task.priority === 'high' ? 'Hoch' : task.priority === 'medium' ? 'Mittel' : 'Niedrig'}
-                    </Badge>
-                    <span className="text-sm font-medium text-gray-900">{task.time}</span>
-                  </div>
-                  <h4 className="font-medium text-gray-900 text-sm">{task.title}</h4>
-                </div>
-              ))}
-              <Button variant="outline" size="sm" className="w-full">
-                <Plus className="h-4 w-4 mr-2" />
-                Neue Aufgabe
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Activity className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                <p>Noch keine Aktivitäten vorhanden</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card className="border-0 shadow-md">

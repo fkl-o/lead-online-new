@@ -6,8 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Table,
@@ -34,6 +32,7 @@ import {
   UserCog,
   Briefcase
 } from 'lucide-react';
+import { useSnackbar } from '@/components/ui/snackbar';
 
 // Einheitlicher Button-Style für Modals
 const buttonStyle = "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600/100 data-[state=on]:shadow-[0_0_0_2px_#be123c] transition-all duration-200 ease-in-out";
@@ -79,6 +78,7 @@ interface User {
   isActive: boolean;
   lastLogin?: string;
   createdAt: string;
+  salutation?: 'herr' | 'frau';
   profile?: {
     company?: string;
     companyUrl?: string;
@@ -122,6 +122,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
   });
 
   const isAdmin = currentUser?.role === 'admin';
+  const { showSnackbar } = useSnackbar();
   // Load users from API
   const loadUsers = async () => {
     if (!isAdmin) return;
@@ -168,93 +169,73 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                          (filterStatus === 'inactive' && !user.isActive);
 
     return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  const handleCreateUser = async () => {
+  });  const handleCreateUser = async () => {
     try {
       const response = await userApi.createUser({
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        salutation: formData.salutation,
         role: formData.role,
         profile: formData.profile
       });
-
       if (response.success) {
-        alert('Benutzer erfolgreich erstellt!');
-        setIsCreateModalOpen(false);
-        resetForm();
-        loadUsers();
+        showSnackbar('Benutzer erfolgreich erstellt!', 'success');
+        setTimeout(() => {
+          setIsCreateModalOpen(false);
+          resetForm();
+          loadUsers();
+        }, 300);
       } else {
-        alert(response.message || 'Fehler beim Erstellen des Benutzers');
+        showSnackbar(response.message || 'Fehler beim Erstellen des Benutzers', 'error');
       }
     } catch (error) {
       console.error('Error creating user:', error);
-      alert('Fehler beim Erstellen des Benutzers');
+      showSnackbar('Fehler beim Erstellen des Benutzers', 'error');
     }
-  };
-
-  const handleUpdateUser = async () => {
+  };  const handleUpdateUser = async () => {
     if (!selectedUser) return;
-
     try {
       const response = await userApi.updateUser(selectedUser._id, {
         name: formData.name,
         email: formData.email,
+        salutation: formData.salutation,
         role: formData.role,
         isActive: formData.isActive,
         profile: formData.profile
       });
-
       if (response.success) {
-        alert('Benutzer erfolgreich aktualisiert!');
-        setIsEditModalOpen(false);
-        setSelectedUser(null);
-        resetForm();
-        loadUsers();
+        showSnackbar('Benutzer erfolgreich aktualisiert!', 'success');
+        setTimeout(() => {
+          setIsEditModalOpen(false);
+          setSelectedUser(null);
+          resetForm();
+          loadUsers();
+        }, 300);
       } else {
-        alert(response.message || 'Fehler beim Aktualisieren des Benutzers');
+        showSnackbar(response.message || 'Fehler beim Aktualisieren des Benutzers', 'error');
       }
     } catch (error) {
       console.error('Error updating user:', error);
-      alert('Fehler beim Aktualisieren des Benutzers');
+      showSnackbar('Fehler beim Aktualisieren des Benutzers', 'error');
     }
   };  const handleDeleteUser = async (userId: string) => {
     if (!confirm('Sind Sie sicher, dass Sie diesen Benutzer deaktivieren möchten? (Der Benutzer wird nicht gelöscht, sondern nur deaktiviert)')) return;
-
     try {
       setIsDeleting(userId);
-      console.log('Deaktiviere Benutzer mit ID:', userId);
-      
       const response = await userApi.deleteUser(userId);
-      console.log('Delete response:', response);
-
       if (response.success) {
-        // Setze den Benutzer auf inaktiv in der lokalen Liste
-        setUsers(prevUsers => 
-          prevUsers.map(user => 
-            user._id === userId 
-              ? { ...user, isActive: false }
-              : user
-          )
-        );
-        
-        // Schließe das Actions Modal
+        setUsers(prevUsers => prevUsers.map(user => user._id === userId ? { ...user, isActive: false } : user));
         setIsActionsModalOpen(false);
         setSelectedUser(null);
-        
-        alert('Benutzer erfolgreich deaktiviert!');
-        
-        // Lade die Liste zur Sicherheit neu
-        setTimeout(() => {
-          loadUsers();
-        }, 500);
+        showSnackbar('Benutzer erfolgreich deaktiviert!', 'success');
+        setTimeout(() => loadUsers(), 300);
       } else {
-        alert(response.message || 'Fehler beim Deaktivieren des Benutzers');
+        showSnackbar(response.message || 'Fehler beim Deaktivieren des Benutzers', 'error');
       }
     } catch (error) {
       console.error('Error deactivating user:', error);
-      alert('Fehler beim Deaktivieren des Benutzers');
+      showSnackbar('Fehler beim Deaktivieren des Benutzers', 'error');
     } finally {
       setIsDeleting(null);
     }
@@ -262,70 +243,37 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
   const handlePermanentDeleteUser = async (userId: string) => {
     if (!confirm('⚠️ WARNUNG: Möchten Sie diesen Benutzer PERMANENT löschen?\n\nDies kann NICHT rückgängig gemacht werden!\nAlle Daten des Benutzers werden unwiderruflich gelöscht.')) return;
-
     try {
       setIsDeleting(userId);
-      console.log('Lösche Benutzer permanent mit ID:', userId);
-      
       const response = await userApi.permanentDeleteUser(userId);
-      console.log('Permanent delete response:', response);
-
       if (response.success) {
-        // Entferne den Benutzer komplett aus der lokalen Liste
-        setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
-        
-        // Schließe das Actions Modal
         setIsActionsModalOpen(false);
         setSelectedUser(null);
-        
-        alert('Benutzer permanent gelöscht!');
-        
-        // Lade die Liste zur Sicherheit neu
-        setTimeout(() => {
-          loadUsers();
-        }, 500);
+        showSnackbar('Benutzer permanent gelöscht!', 'success');
+        setTimeout(() => loadUsers(), 300);
       } else {
-        alert(response.message || 'Fehler beim permanenten Löschen des Benutzers');
+        showSnackbar(response.message || 'Fehler beim permanenten Löschen des Benutzers', 'error');
       }
     } catch (error) {
       console.error('Error permanently deleting user:', error);
-      alert('Fehler beim permanenten Löschen des Benutzers');
+      showSnackbar('Fehler beim permanenten Löschen des Benutzers', 'error');
     } finally {
       setIsDeleting(null);
     }
   };const handleToggleUserStatus = async (userId: string, isActive: boolean) => {
     try {
-      console.log('Toggle status für Benutzer:', userId, 'von', isActive, 'zu', !isActive);
-      
       const response = await userApi.toggleUserStatus(userId, !isActive);
-      console.log('Toggle response:', response);
-
       if (response.success) {
-        // Aktualisiere den Benutzer sofort in der lokalen Liste
-        setUsers(prevUsers => 
-          prevUsers.map(user => 
-            user._id === userId 
-              ? { ...user, isActive: !isActive }
-              : user
-          )
-        );
-        
-        // Schließe das Actions Modal
         setIsActionsModalOpen(false);
         setSelectedUser(null);
-        
-        alert(`Benutzer erfolgreich ${!isActive ? 'aktiviert' : 'deaktiviert'}!`);
-        
-        // Lade die Liste zur Sicherheit neu
-        setTimeout(() => {
-          loadUsers();
-        }, 500);
+        showSnackbar(`Benutzer erfolgreich ${!isActive ? 'aktiviert' : 'deaktiviert'}!`, 'success');
+        setTimeout(() => loadUsers(), 300);
       } else {
-        alert(response.message || 'Fehler beim Ändern des Benutzerstatus');
+        showSnackbar(response.message || 'Fehler beim Ändern des Benutzerstatus', 'error');
       }
     } catch (error) {
       console.error('Error toggling user status:', error);
-      alert('Fehler beim Ändern des Benutzerstatus');
+      showSnackbar('Fehler beim Ändern des Benutzerstatus', 'error');
     }
   };const resetForm = () => {
     setFormData({
@@ -353,7 +301,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     setFormData({
       name: user.name,
       email: user.email,      password: '',
-      salutation: null, // Anrede wird beim Bearbeiten nicht geändert
+      salutation: user.salutation || null,
       role: user.role,
       isActive: user.isActive,
       profile: {
@@ -395,12 +343,12 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     if (!selectedUser) return;
 
     if (newPassword !== confirmPassword) {
-      alert('Die Passwörter stimmen nicht überein!');
+      showSnackbar('Die Passwörter stimmen nicht überein!', 'error');
       return;
     }
 
     if (newPassword.length < 6) {
-      alert('Das Passwort muss mindestens 6 Zeichen lang sein!');
+      showSnackbar('Das Passwort muss mindestens 6 Zeichen lang sein!', 'error');
       return;
     }
 
@@ -408,17 +356,17 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       const response = await userApi.resetPassword(selectedUser._id, newPassword);
 
       if (response.success) {
-        alert('Passwort erfolgreich zurückgesetzt!');
+        showSnackbar('Passwort erfolgreich zurückgesetzt!', 'success');
         setIsPasswordResetModalOpen(false);
         setSelectedUser(null);
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        alert(response.message || 'Fehler beim Zurücksetzen des Passworts');
+        showSnackbar(response.message || 'Fehler beim Zurücksetzen des Passworts', 'error');
       }
     } catch (error) {
       console.error('Error resetting password:', error);
-      alert('Fehler beim Zurücksetzen des Passworts');
+      showSnackbar('Fehler beim Zurücksetzen des Passworts', 'error');
     }
   };
 
@@ -667,8 +615,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                       Grunddaten
                     </h4>
                     
-                    {/* Anrede + Name */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                    {/* Anrede + Name */}                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                       <div className="md:col-span-1">
                         <Label className="font-semibold text-slate-700 block mb-3">Anrede *</Label>
                         <div className="flex gap-2">
@@ -928,164 +875,233 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
               </Button>
             </div>
 
-            <div className="space-y-6 overflow-y-auto flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-name" className="font-semibold text-slate-700 block mb-2">
-                    Name
-                  </Label>
-                  <Input
-                    id="edit-name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="Vollständiger Name"
-                    className="h-12"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-email" className="font-semibold text-slate-700 block mb-2">
-                    E-Mail
-                  </Label>
-                  <Input
-                    id="edit-email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="benutzer@beispiel.com"
-                    className="h-12"
-                  />
-                </div>
-              </div>
+            <ScrollArea className="flex-1 overflow-auto pr-3 thin-scrollbar" type="always">
+              <div className="px-1 pb-4">
+                <form className="space-y-6" onSubmit={e => e.preventDefault()}>
+                  {/* Grunddaten */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-slate-700 flex items-center gap-2">
+                      <Users className="h-4 w-4 text-brand-600" />
+                      Grunddaten
+                    </h4>
+                      {/* Anrede + Name */}                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                      <div className="md:col-span-1">
+                        <Label className="font-semibold text-slate-700 block mb-3">Anrede *</Label>
+                        <div className="flex gap-2">
+                          {['herr', 'frau'].map(option => (
+                            <SelectableButton
+                              key={option}
+                              label={option === 'herr' ? 'Herr' : 'Frau'}
+                              value={option}
+                              isSelected={formData.salutation === option}
+                              onClick={(value) => setFormData({...formData, salutation: value as 'herr' | 'frau'})}
+                              isRadio={true}
+                              name="edit-salutation"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="md:col-span-2">
+                        <Label htmlFor="edit-name" className="font-semibold text-slate-700 block mb-2 flex items-center gap-2">
+                          <Users className="h-4 w-4 text-brand-600" />
+                          Name *
+                        </Label>
+                        <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
+                          <Input
+                            id="edit-name"
+                            value={formData.name}
+                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            placeholder="Vollständiger Name"
+                            className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-role" className="font-semibold text-slate-700 block mb-2">
-                    Rolle
-                  </Label>                  <Select value={formData.role} onValueChange={(value: 'admin' | 'vertrieb' | 'kunde' | 'lead') => setFormData({...formData, role: value})}>
-                    <SelectTrigger className="bg-white h-12 border-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                      <SelectItem value="admin">Administrator</SelectItem>
-                      <SelectItem value="vertrieb">Vertrieb</SelectItem>
-                      <SelectItem value="kunde">Kunde</SelectItem>
-                      <SelectItem value="lead">Lead</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center space-x-2 pt-8">
-                  <Switch
-                    id="isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) => setFormData({...formData, isActive: checked})}
-                  />
-                  <Label htmlFor="isActive" className="font-semibold text-slate-700">
-                    Benutzer aktiv
-                  </Label>
-                </div>
+                    {/* E-Mail */}
+                    <div>
+                      <Label htmlFor="edit-email" className="font-semibold text-slate-700 block mb-2 flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-brand-600" />
+                        E-Mail *
+                      </Label>
+                      <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
+                        <Input
+                          id="edit-email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                          placeholder="benutzer@beispiel.com"
+                          className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Rolle - Vollbreite */}
+                    <div>
+                      <Label className="font-semibold text-slate-700 block mb-3 flex items-center gap-2">
+                        <UserCog className="h-4 w-4 text-brand-600" />
+                        Rolle
+                      </Label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {[
+                          { value: 'admin', label: 'Admin', icon: <Shield className="h-4 w-4 text-brand-600" /> },
+                          { value: 'vertrieb', label: 'Vertrieb', icon: <Users className="h-4 w-4 text-brand-600" /> },
+                          { value: 'kunde', label: 'Kunde', icon: <UserCog className="h-4 w-4 text-brand-600" /> },
+                          { value: 'lead', label: 'Lead', icon: <Briefcase className="h-4 w-4 text-brand-600" /> },
+                        ].map(option => (
+                          <SelectableButton
+                            key={option.value}
+                            label={option.label}
+                            value={option.value}
+                            icon={option.icon}
+                            isSelected={formData.role === option.value}
+                            onClick={(value) => setFormData({...formData, role: value as 'admin' | 'vertrieb' | 'kunde' | 'lead'})}
+                            isRadio={true}
+                            name="edit-role"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <hr className="border-gray-200" />
+
+                  {/* Profil Informationen */}
+                  <div className="space-y-6">
+                    <h4 className="font-semibold text-slate-700 flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 text-brand-600" />
+                      Profil Informationen
+                    </h4>
+                    
+                    {/* Unternehmensangaben */}
+                    <div className="space-y-4">
+                      <h5 className="text-sm font-medium text-slate-600 uppercase tracking-wide">Unternehmensangaben</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="edit-company" className="font-semibold text-slate-700 block mb-2">
+                            Unternehmen
+                          </Label>
+                          <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
+                            <Input
+                              id="edit-company"
+                              value={formData.profile.company}
+                              onChange={(e) => setFormData({
+                                ...formData, 
+                                profile: {...formData.profile, company: e.target.value}
+                              })}
+                              placeholder="Firmenname"
+                              className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-companyUrl" className="font-semibold text-slate-700 block mb-2">
+                            Unternehmens-URL
+                          </Label>
+                          <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
+                            <Input
+                              id="edit-companyUrl"
+                              value={formData.profile.companyUrl}
+                              onChange={(e) => setFormData({
+                                ...formData, 
+                                profile: {...formData.profile, companyUrl: e.target.value}
+                              })}
+                              placeholder="https://www.beispiel.de"
+                              className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Kontakt & Position */}
+                    <div className="space-y-4">
+                      <h5 className="text-sm font-medium text-slate-600 uppercase tracking-wide">Kontakt & Position</h5>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="edit-phone" className="font-semibold text-slate-700 block mb-2">
+                            Telefon
+                          </Label>
+                          <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
+                            <Input
+                              id="edit-phone"
+                              value={formData.profile.phone}
+                              onChange={(e) => setFormData({
+                                ...formData, 
+                                profile: {...formData.profile, phone: e.target.value}
+                              })}
+                              placeholder="+49 123 456789"
+                              className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="edit-department" className="font-semibold text-slate-700 block mb-2">
+                              Abteilung
+                            </Label>
+                            <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
+                              <Input
+                                id="edit-department"
+                                value={formData.profile.department}
+                                onChange={(e) => setFormData({
+                                  ...formData, 
+                                  profile: {...formData.profile, department: e.target.value}
+                                })}
+                                placeholder="Marketing, Vertrieb, etc."
+                                className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="edit-position" className="font-semibold text-slate-700 block mb-2">
+                              Position
+                            </Label>
+                            <div className="flex w-full rounded-md border border-input focus-within:ring-1 focus-within:ring-ring h-12">
+                              <Input
+                                id="edit-position"
+                                value={formData.profile.position}
+                                onChange={(e) => setFormData({
+                                  ...formData, 
+                                  profile: {...formData.profile, position: e.target.value}
+                                })}
+                                placeholder="Vertriebsleiter, etc."
+                                className="flex-1 border-0 rounded-md focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Submit Buttons */}
+                  <div className="pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        onClick={() => setIsEditModalOpen(false)}
+                        className="px-6 py-3"
+                      >
+                        Abbrechen
+                      </Button>                      <Button 
+                        type="button"
+                        onClick={handleUpdateUser} 
+                        className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-3 font-semibold"
+                        disabled={!formData.name || !formData.email || !formData.salutation}
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Änderungen speichern
+                      </Button>
+                    </div>
+                  </div>
+                </form>
               </div>
-              
-              <Separator />
-                <div className="space-y-4">
-                <h4 className="font-semibold text-slate-700">Profil Informationen</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="edit-company" className="font-semibold text-slate-700 block mb-2">
-                      Unternehmen
-                    </Label>
-                    <Input
-                      id="edit-company"
-                      value={formData.profile.company}
-                      onChange={(e) => setFormData({
-                        ...formData, 
-                        profile: {...formData.profile, company: e.target.value}
-                      })}
-                      placeholder="Firmenname"
-                      className="h-12"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-companyUrl" className="font-semibold text-slate-700 block mb-2">
-                      Unternehmens-URL
-                    </Label>
-                    <Input
-                      id="edit-companyUrl"
-                      value={formData.profile.companyUrl}
-                      onChange={(e) => setFormData({
-                        ...formData, 
-                        profile: {...formData.profile, companyUrl: e.target.value}
-                      })}
-                      placeholder="https://www.beispiel.de"
-                      className="h-12"
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="edit-phone" className="font-semibold text-slate-700 block mb-2">
-                      Telefon
-                    </Label>
-                    <Input
-                      id="edit-phone"
-                      value={formData.profile.phone}
-                      onChange={(e) => setFormData({
-                        ...formData, 
-                        profile: {...formData.profile, phone: e.target.value}
-                      })}
-                      placeholder="+49 123 456789"
-                      className="h-12"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-department" className="font-semibold text-slate-700 block mb-2">
-                      Abteilung
-                    </Label>
-                    <Input
-                      id="edit-department"
-                      value={formData.profile.department}
-                      onChange={(e) => setFormData({
-                        ...formData, 
-                        profile: {...formData.profile, department: e.target.value}
-                      })}
-                      placeholder="Marketing, Vertrieb, etc."
-                      className="h-12"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="edit-position" className="font-semibold text-slate-700 block mb-2">
-                    Position
-                  </Label>
-                  <Input
-                    id="edit-position"
-                    value={formData.profile.position}
-                    onChange={(e) => setFormData({
-                      ...formData, 
-                      profile: {...formData.profile, position: e.target.value}
-                    })}
-                    placeholder="Vertriebsleiter, etc."
-                    className="h-12"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsEditModalOpen(false)}
-                className="px-6 py-2"
-              >
-                Abbrechen
-              </Button>
-              <Button 
-                onClick={handleUpdateUser} 
-                className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2"
-                disabled={!formData.name || !formData.email}
-              >
-                Änderungen speichern
-              </Button>
-            </div>
+            </ScrollArea>
           </div>
         </div>
       )}
@@ -1122,56 +1138,65 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
               >
                 <X className="h-4 w-4" />
               </Button>
-            </div>
-
-            <div className="space-y-3">
+            </div>            <div className="space-y-2">
               {/* Bearbeiten Button */}
               <Button
+                variant="ghost"
                 onClick={() => {
                   setIsActionsModalOpen(false);
                   openEditModal(selectedUser);
                 }}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 flex items-center justify-start gap-3 px-4"
+                className="w-full justify-start h-11 px-4 text-left hover:bg-gray-50 border border-gray-200 hover:border-gray-300 transition-all duration-200"
               >
-                <Edit className="h-5 w-5" />
-                <span className="font-medium">Benutzer bearbeiten</span>
-              </Button>              {/* Status Toggle Button */}
+                <Edit className="h-4 w-4 mr-3 text-gray-600" />
+                <span className="text-gray-700 font-medium">Benutzer bearbeiten</span>
+              </Button>
+
+              {/* Status Toggle Button */}
               <Button
+                variant="ghost"
                 onClick={async () => {
                   await handleToggleUserStatus(selectedUser._id, selectedUser.isActive);
                 }}
-                className={`w-full h-12 flex items-center justify-start gap-3 px-4 ${
-                  selectedUser.isActive 
-                    ? 'bg-orange-600 hover:bg-orange-700 text-white' 
-                    : 'bg-green-600 hover:bg-green-700 text-white'
-                }`}
+                className="w-full justify-start h-11 px-4 text-left hover:bg-gray-50 border border-gray-200 hover:border-gray-300 transition-all duration-200"
               >
-                {selectedUser.isActive ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                <span className="font-medium">
+                {selectedUser.isActive ? (
+                  <EyeOff className="h-4 w-4 mr-3 text-gray-600" />
+                ) : (
+                  <Eye className="h-4 w-4 mr-3 text-gray-600" />
+                )}
+                <span className="text-gray-700 font-medium">
                   {selectedUser.isActive ? 'Benutzer deaktivieren' : 'Benutzer aktivieren'}
                 </span>
               </Button>
 
               {/* Passwort zurücksetzen Button */}
               <Button
+                variant="ghost"
                 onClick={() => {
                   setIsActionsModalOpen(false);
                   openPasswordResetModal(selectedUser);
                 }}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white h-12 flex items-center justify-start gap-3 px-4"
+                className="w-full justify-start h-11 px-4 text-left hover:bg-gray-50 border border-gray-200 hover:border-gray-300 transition-all duration-200"
               >
-                <Shield className="h-5 w-5" />
-                <span className="font-medium">Passwort zurücksetzen</span>
-              </Button>              {/* Deaktivieren Button */}
+                <Shield className="h-4 w-4 mr-3 text-gray-600" />
+                <span className="text-gray-700 font-medium">Passwort zurücksetzen</span>
+              </Button>
+
+              {/* Trennlinie vor gefährlichen Aktionen */}
+              <div className="border-t border-gray-200 my-3"></div>
+
+              {/* Deaktivieren Button */}
               <Button
+                variant="ghost"
                 onClick={async () => {
                   await handleDeleteUser(selectedUser._id);
                 }}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white h-12 flex items-center justify-start gap-3 px-4"
+                className="w-full justify-start h-11 px-4 text-left hover:bg-orange-50 border border-gray-200 hover:border-orange-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isDeleting === selectedUser._id || !selectedUser.isActive}
               >
-                <EyeOff className="h-5 w-5" />
-                <span className="font-medium">
+                <EyeOff className="h-4 w-4 mr-3 text-orange-600" />
+                <span className="text-orange-700 font-medium">
                   {isDeleting === selectedUser._id ? 'Deaktiviere...' : 
                    !selectedUser.isActive ? 'Bereits deaktiviert' : 'Benutzer deaktivieren'}
                 </span>
@@ -1179,14 +1204,15 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
               {/* Permanent löschen Button */}
               <Button
+                variant="ghost"
                 onClick={async () => {
                   await handlePermanentDeleteUser(selectedUser._id);
                 }}
-                className="w-full bg-red-600 hover:bg-red-700 text-white h-12 flex items-center justify-start gap-3 px-4"
+                className="w-full justify-start h-11 px-4 text-left hover:bg-red-50 border border-gray-200 hover:border-red-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isDeleting === selectedUser._id}
               >
-                <Trash2 className="h-5 w-5" />
-                <span className="font-medium">
+                <Trash2 className="h-4 w-4 mr-3 text-red-600" />
+                <span className="text-red-700 font-medium">
                   {isDeleting === selectedUser._id ? 'Lösche permanent...' : 'Permanent löschen'}
                 </span>
               </Button>

@@ -64,12 +64,8 @@ export default defineConfig({
           ],
             // Animation libraries (removed framer-motion)
           // 'animation': ['framer-motion'],
-          
-          // Icon libraries
+            // Icon libraries
           'icons': ['lucide-react'],
-          
-          // Chart libraries
-          'charts': ['recharts'],
           
           // Form libraries
           'forms': ['react-hook-form', '@hookform/resolvers', 'zod'],

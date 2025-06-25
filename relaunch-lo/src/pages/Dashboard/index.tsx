@@ -1,5 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { leadApi, authApi } from '@/lib/api';
+import { useSnackbar } from '@/components/ui/snackbar';
 
 // Core components - always loaded
 import Sidebar from './components/Sidebar';
@@ -13,6 +14,7 @@ const LeadsTable = lazy(() => import('./components/LeadsTable'));
 const LeadEditModal = lazy(() => import('./components/LeadEditModal'));
 const UserManagement = lazy(() => import('./components/UserManagement'));
 const CompanyManagement = lazy(() => import('./components/CompanyManagement'));
+const AccountModal = lazy(() => import('./components/AccountModal'));
 
 // Types
 interface User {
@@ -85,16 +87,35 @@ interface Stats {
   };
 }
 
+interface Activity {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  time: string;
+  priority: string;
+  leadId?: string;
+  user?: {
+    _id: string;
+    name: string;
+  };
+}
+
 const Dashboard = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Lead>>({});
   const [currentView, setCurrentView] = useState('overview');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { showSnackbar } = useSnackbar();
+
   useEffect(() => {
     // Authentication is already verified by ProtectedRoute
     // Just get user from localStorage and load data
@@ -109,10 +130,11 @@ const Dashboard = () => {
     try {
       setLoading(true);
       
-      // Load leads and stats in parallel
-      const [leadsResponse, statsResponse] = await Promise.all([
+      // Load leads, stats and activities in parallel
+      const [leadsResponse, statsResponse, activitiesResponse] = await Promise.all([
         leadApi.getLeads(),
-        leadApi.getLeadStats()
+        leadApi.getLeadStats(),
+        leadApi.getRecentActivities(10)
       ]);
 
       if (leadsResponse.success) {
@@ -121,6 +143,10 @@ const Dashboard = () => {
 
       if (statsResponse.success) {
         setStats(statsResponse.data);
+      }
+
+      if (activitiesResponse.success) {
+        setActivities(activitiesResponse.data || []);
       }
 
     } catch (err) {
@@ -138,7 +164,7 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error('Error updating lead status:', err);
-      alert('Fehler beim Aktualisieren des Lead-Status');
+      showSnackbar('Fehler beim Aktualisieren des Lead-Status', 'error');
     }
   };
 
@@ -163,11 +189,11 @@ const Dashboard = () => {
         setSelectedLead(null);
         setEditForm({});
         loadDashboardData();
-        alert('Lead erfolgreich aktualisiert!');
+        showSnackbar('Lead erfolgreich aktualisiert!', 'success');
       }
     } catch (err) {
       console.error('Error updating lead:', err);
-      alert('Fehler beim Speichern des Leads');
+      showSnackbar('Fehler beim Speichern des Leads', 'error');
     }
   };const handleAddComment = async (commentText: string) => {
     if (!selectedLead || !commentText.trim()) return;
@@ -184,11 +210,11 @@ const Dashboard = () => {
         // Also update the selectedLead for consistency
         setSelectedLead(response.data);
         
-        alert('Kommentar erfolgreich hinzugefügt!');
+        showSnackbar('Kommentar erfolgreich hinzugefügt!', 'success');
       }
     } catch (err) {
       console.error('Error adding comment:', err);
-      alert('Fehler beim Hinzufügen des Kommentars');
+      showSnackbar('Fehler beim Hinzufügen des Kommentars', 'error');
     }  };
 
   const handleFormChange = (field: string, value: any) => {
@@ -207,7 +233,25 @@ const Dashboard = () => {
         [field]: value
       }));
     }
-  };  const handleLogout = () => {
+  };  const handleUserUpdated = () => {
+    // Reload user data from localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  };
+
+  const handleOpenAccountModal = () => {
+    console.log('🚀🚀🚀 Opening account modal...');
+    setIsAccountModalOpen(true);
+    console.log('🚀🚀🚀 Account modal state set to TRUE');
+  };
+
+  const handleCloseAccountModal = () => {
+    setIsAccountModalOpen(false);
+  };
+
+  const handleLogout = () => {
     authApi.logout();
     setUser(null);
     setLeads([]);
@@ -228,7 +272,7 @@ const Dashboard = () => {
       case 'overview':
         return (
           <ComponentWrapper>
-            <Overview stats={stats || { totalLeads: 0 }} user={user} />
+            <Overview stats={stats || { totalLeads: 0 }} user={user} activities={activities} />
           </ComponentWrapper>
         );
       case 'leads':
@@ -298,21 +342,23 @@ const Dashboard = () => {
     return <ErrorState error={error} />;
   }
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
       <Sidebar
         currentView={currentView}
         onViewChange={setCurrentView}
         user={user}
+        onCollapseChange={setSidebarCollapsed}
       />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      {/* Main Content with dynamic left margin to account for fixed sidebar */}
+      <div className={`flex flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
         {/* Top Bar */}
         <TopBar
           user={user}
           currentView={currentView}
           onLogout={handleLogout}
+          onOpenAccountModal={handleOpenAccountModal}
         />
 
         {/* Content Area */}
@@ -329,6 +375,16 @@ const Dashboard = () => {
           onFormChange={handleFormChange}
           onSave={handleSaveLead}
           onAddComment={handleAddComment}
+        />
+      </Suspense>
+
+      {/* Account Modal */}
+      <Suspense fallback={null}>
+        <AccountModal
+          isOpen={isAccountModalOpen}
+          onClose={handleCloseAccountModal}
+          user={user}
+          onUserUpdated={handleUserUpdated}
         />
       </Suspense>
     </div>

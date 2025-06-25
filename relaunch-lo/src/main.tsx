@@ -19,6 +19,7 @@ import DigitalizationLayout from './pages/Digitalization/DigitalizationLayout';
 import LoginPage from './pages/LoginPage';
 import ContactPage from './pages/ContactPage';
 import TestPage from './pages/TestPage';
+import { SnackbarProvider } from './components/ui/snackbar';
 
 // Lazy load dashboard components to improve initial page load
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -86,9 +87,11 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <HelmetProvider>
-      <RouterProvider router={router} />
-    </HelmetProvider>
+    <SnackbarProvider>
+      <HelmetProvider>
+        <RouterProvider router={router} />
+      </HelmetProvider>
+    </SnackbarProvider>
   </React.StrictMode>
 );
 

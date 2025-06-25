@@ -815,3 +815,160 @@ export const deleteAttachment = async (req, res, next) => {
     });
   }
 };
+
+// @desc    Get recent activities from all leads
+// @route   GET /api/leads/activities
+// @access  Private (Admin/User)
+export const getRecentActivities = async (req, res, next) => {
+  try {
+    const { limit = 10 } = req.query;
+    
+    // Get recent communications from all leads
+    const activities = await Lead.aggregate([
+      { $match: { isActive: true } },
+      { $unwind: '$communications' },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'communications.userId',
+          foreignField: '_id',
+          as: 'communications.user'
+        }
+      },
+      { $unwind: { path: '$communications.user', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          _id: '$communications._id',
+          leadId: '$_id',
+          leadName: '$name',
+          leadEmail: '$email',
+          type: '$communications.type',
+          subject: '$communications.subject',
+          content: '$communications.content',
+          date: '$communications.date',
+          direction: '$communications.direction',
+          user: {
+            _id: '$communications.user._id',
+            name: '$communications.user.name'
+          }
+        }
+      },
+      { $sort: { date: -1 } },
+      { $limit: parseInt(limit) }
+    ]);
+
+    // Add status changes as activities
+    const statusActivities = await Lead.aggregate([
+      { $match: { isActive: true, updatedAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } },
+      {
+        $project: {
+          _id: 1,
+          leadName: '$name',
+          leadEmail: '$email',
+          status: 1,
+          updatedAt: 1,
+          assignedTo: 1
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'assignedTo',
+          foreignField: '_id',
+          as: 'assignedUser'
+        }
+      },
+      { $unwind: { path: '$assignedUser', preserveNullAndEmptyArrays: true } },
+      { $sort: { updatedAt: -1 } },
+      { $limit: parseInt(limit) / 2 }
+    ]);
+
+    // Combine and format activities
+    const formattedActivities = [
+      ...activities.map(activity => ({
+        id: activity._id,
+        type: activity.type === 'follow-up' ? 'comment' : activity.type,
+        title: getActivityTitle(activity.type, activity.subject),
+        description: `${activity.leadName} - ${activity.content || activity.subject || 'Neue Aktivität'}`,
+        time: getTimeAgo(activity.date),
+        priority: getPriorityFromType(activity.type),
+        leadId: activity.leadId,
+        user: activity.user
+      })),
+      ...statusActivities.map(activity => ({
+        id: `status-${activity._id}`,
+        type: 'status',
+        title: 'Status aktualisiert',
+        description: `${activity.leadName} - Status: ${getStatusText(activity.status)}`,
+        time: getTimeAgo(activity.updatedAt),
+        priority: 'medium',
+        leadId: activity._id,
+        user: activity.assignedUser
+      }))
+    ].sort((a, b) => new Date(b.date || b.updatedAt) - new Date(a.date || a.updatedAt))
+     .slice(0, parseInt(limit));
+
+    res.status(200).json({
+      success: true,
+      data: formattedActivities
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Helper functions
+function getActivityTitle(type, subject) {
+  const titles = {
+    'email': 'E-Mail versendet',
+    'phone': 'Anruf getätigt',
+    'meeting': 'Meeting abgeschlossen',
+    'proposal': 'Angebot erstellt',
+    'follow-up': 'Follow-up hinzugefügt',
+    'comment': 'Kommentar hinzugefügt'
+  };
+  return subject || titles[type] || 'Neue Aktivität';
+}
+
+function getPriorityFromType(type) {
+  const priorities = {
+    'email': 'medium',
+    'phone': 'high',
+    'meeting': 'high',
+    'proposal': 'high',
+    'follow-up': 'low',
+    'comment': 'low'
+  };
+  return priorities[type] || 'medium';
+}
+
+function getStatusText(status) {
+  const statusTexts = {
+    'new': 'Neu',
+    'contacted': 'Kontaktiert',
+    'qualified': 'Qualifiziert',
+    'proposal': 'Angebot',
+    'negotiation': 'Verhandlung',
+    'closed-won': 'Gewonnen',
+    'closed-lost': 'Verloren',
+    'nurturing': 'Pflege'
+  };
+  return statusTexts[status] || status;
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffInMs = now - new Date(date);
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} Min.`;
+  } else if (diffInHours < 24) {
+    return `${diffInHours} Std.`;
+  } else {
+    return `${diffInDays} Tag${diffInDays > 1 ? 'e' : ''}`;
+  }
+}

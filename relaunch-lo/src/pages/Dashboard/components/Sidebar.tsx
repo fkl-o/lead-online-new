@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { 
-  BarChart3, 
   Users, 
   Building2, 
   MessageSquare, 
   FileText, 
   Settings, 
-  Bell, 
-  PieChart,
+  Bell,
   TrendingUp,
   Calendar,
   Target,
@@ -21,11 +19,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,
-  LogOut,
   ExternalLink
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { authApi } from '@/lib/api';
 
 interface MenuItem {
   id: string;
@@ -46,6 +42,7 @@ interface SidebarProps {
   onViewChange: (view: string) => void;
   user: any;
   className?: string;
+  onCollapseChange?: (collapsed: boolean) => void;
 }
 
 const menuItems: MenuSection[] = [
@@ -62,11 +59,8 @@ const menuItems: MenuSection[] = [
     items: [
       { id: 'users', label: 'Benutzer', icon: Users, badge: null, adminOnly: true },
     ]
-  },
-  {    section: 'In Entwicklung',
+  },  {    section: 'In Entwicklung',
     items: [
-      { id: 'analytics', label: 'Analytics', icon: BarChart3, badge: null, disabled: true },
-      { id: 'reports', label: 'Berichte', icon: PieChart, badge: null, disabled: true },
       { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, badge: null, disabled: true },
       { id: 'activities', label: 'Aktivitäten', icon: Activity, badge: null, disabled: true },
       { id: 'calendar', label: 'Kalender', icon: Calendar, badge: null, disabled: true },
@@ -81,24 +75,10 @@ const menuItems: MenuSection[] = [
   }
 ];
 
-const Sidebar = ({ currentView, onViewChange, user, className }: SidebarProps) => {
+const Sidebar = ({ currentView, onViewChange, user, className, onCollapseChange }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const isAdmin = user?.role === 'admin';
-
-  const handleLogout = async () => {
-    try {
-      // Clear localStorage and logout
-      authApi.logout();
-      // Navigate to home page
-      navigate('/');
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Still logout and navigate even if there's an error
-      authApi.logout();
-      navigate('/');
-    }
-  };
 
   const handleBackToWebsite = () => {
     navigate('/');
@@ -110,16 +90,15 @@ const Sidebar = ({ currentView, onViewChange, user, className }: SidebarProps) =
   })).filter(section => section.items.length > 0);
   return (
     <div className={cn(
-      "bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-sm h-screen",
+      "bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-sm h-screen fixed left-0 top-0 z-40",
       collapsed ? "w-16" : "w-64",
       className
     )}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
         {!collapsed && (
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-brand-600 to-secondary-600 p-2 rounded-lg">
-              <BarChart3 className="h-5 w-5 text-white" />
+          <div className="flex items-center space-x-3">            <div className="bg-gradient-to-r from-brand-600 to-secondary-600 p-2 rounded-lg">
+              <Target className="h-5 w-5 text-white" />
             </div>
             <div>
               <h2 className="font-bold text-gray-900">LeadGen Pro</h2>
@@ -130,36 +109,18 @@ const Sidebar = ({ currentView, onViewChange, user, className }: SidebarProps) =
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => {
+            const newCollapsed = !collapsed;
+            setCollapsed(newCollapsed);
+            onCollapseChange?.(newCollapsed);
+          }}
           className="h-8 w-8 p-0"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
       </div>
 
-      {/* User Info */}
-      {!collapsed && (
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-full p-2">
-              <span className="text-white font-semibold text-sm">
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900 truncate">{user?.name}</p>
-              <div className="flex items-center space-x-1">
-                <Badge 
-                  variant={user?.role === 'admin' ? 'default' : 'secondary'}
-                  className="text-xs"
-                >
-                  {user?.role === 'admin' ? 'Administrator' : 'Benutzer'}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}      {/* Navigation */}
+      {/* Navigation */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
         {filteredMenuItems.map((section) => (
           <div key={section.section} className="p-2">
@@ -234,25 +195,8 @@ const Sidebar = ({ currentView, onViewChange, user, className }: SidebarProps) =
       </div>      {/* Footer with Action Buttons */}
       <div className={cn(
         "sticky bottom-0 bg-white border-t border-gray-200",
-        collapsed ? "p-2 space-y-2" : "p-4 space-y-3"
+        collapsed ? "p-2" : "p-4"
       )}>
-        {/* Logout Button */}
-        <Button
-          variant="default"
-          className={cn(
-            "w-full bg-red-600 hover:bg-red-700 text-white",
-            collapsed ? "justify-center px-0" : "justify-start"
-          )}
-          onClick={handleLogout}
-          title={collapsed ? "Abmelden" : undefined}
-        >
-          <LogOut className={cn(
-            "h-4 w-4 shrink-0",
-            collapsed ? "" : "mr-3"
-          )} />
-          {!collapsed && <span>Abmelden</span>}
-        </Button>
-
         {/* Back to Website Button */}
         <Button
           variant="outline"
@@ -272,7 +216,7 @@ const Sidebar = ({ currentView, onViewChange, user, className }: SidebarProps) =
 
         {/* Version Info (only when not collapsed) */}
         {!collapsed && (
-          <div className="text-xs text-gray-500 text-center pt-2">
+          <div className="text-xs text-gray-500 text-center pt-3">
             <p>Version 2.0.0</p>
             <p>© 2024 LeadGen Pro</p>
           </div>

@@ -16,6 +16,7 @@ import {
   Mail
 } from "lucide-react";
 import { leadApi } from '@/lib/api';
+import { useSnackbar } from '@/components/ui/snackbar';
 
 const buttonStyle =
   "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600/100 data-[state=on]:shadow-[0_0_0_2px_#be123c] transition-all duration-200 ease-in-out";
@@ -83,6 +84,7 @@ const SelectableButton = ({
 );
 
 const WebsiteModal = ({ open, onClose }: ModalProps) => {
+  const { showSnackbar } = useSnackbar();
   const [isMounted, setIsMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -137,13 +139,13 @@ const WebsiteModal = ({ open, onClose }: ModalProps) => {
   const handleSalutationClick = (salutation: string) => setSelectedSalutation(salutation);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!websiteUrl) return alert("Bitte geben Sie Ihre Unternehmens-URL ein.");
-    if (selectedGoals.length === 0) return alert("Bitte wählen Sie mindestens ein Ziel aus.");
-    if (!selectedStyle) return alert("Bitte wählen Sie einen Stil aus.");
-    if (!selectedSalutation) return alert("Bitte wählen Sie eine Anrede aus.");
-    if (!name) return alert("Bitte geben Sie Ihren Namen ein.");
-    if (!email) return alert("Bitte geben Sie Ihre E-Mail-Adresse ein.");
-    if (!privacyAgreed) return alert("Bitte stimmen Sie den Datenschutzhinweisen zu.");
+    if (!websiteUrl) return showSnackbar("Bitte geben Sie Ihre Unternehmens-URL ein.", "error");
+    if (selectedGoals.length === 0) return showSnackbar("Bitte wählen Sie mindestens ein Ziel aus.", "error");
+    if (!selectedStyle) return showSnackbar("Bitte wählen Sie einen Stil aus.", "error");
+    if (!selectedSalutation) return showSnackbar("Bitte wählen Sie eine Anrede aus.", "error");
+    if (!name) return showSnackbar("Bitte geben Sie Ihren Namen ein.", "error");
+    if (!email) return showSnackbar("Bitte geben Sie Ihre E-Mail-Adresse ein.", "error");
+    if (!privacyAgreed) return showSnackbar("Bitte stimmen Sie den Datenschutzhinweisen zu.", "error");
     
     setIsSubmitting(true);
       try {
@@ -169,13 +171,14 @@ const WebsiteModal = ({ open, onClose }: ModalProps) => {
       const response = await leadApi.createLead(leadData);
       
       if (response.success) {
-        alert("Vielen Dank! Ihre Website-Anfrage wurde erfolgreich übermittelt. Wir melden uns in Kürze bei Ihnen.");
+        showSnackbar("Vielen Dank! Ihre Website-Anfrage wurde erfolgreich übermittelt. Wir melden uns in Kürze bei Ihnen.", "success");
         handleClose();
       } else {
         throw new Error(response.message || 'Fehler beim Senden der Anfrage');
-      }    } catch (error) {
+      }
+    } catch (error) {
       console.error('Error submitting website lead:', error);
-      alert("Es gab einen Fehler beim Senden Ihrer Anfrage. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.");
+      showSnackbar("Es gab einen Fehler beim Senden Ihrer Anfrage. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.", "error");
     } finally {
       setIsSubmitting(false);
     }

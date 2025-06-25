@@ -165,6 +165,7 @@ export const updateUser = async (req, res, next) => {
     const fieldsToUpdate = {
       name: req.body.name,
       email: req.body.email,
+      salutation: req.body.salutation,
       role: req.body.role,
       isActive: req.body.isActive,
       profile: req.body.profile,

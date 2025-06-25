@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit3, Paperclip, MessageSquare, X, User, Building, FileText, Send, Upload, FileIcon, Trash2 } from 'lucide-react';
+import { useSnackbar } from '@/components/ui/snackbar';
 
 interface Company {
   name?: string;
@@ -91,6 +92,7 @@ const LeadEditModal = ({
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadStatus, setUploadStatus] = useState<'uploading' | 'processing'>('uploading');
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     // Load current user from localStorage
@@ -272,15 +274,15 @@ const LeadEditModal = ({
             const result = JSON.parse(xhr.responseText);
             if (result.success && result.data) {
               onFormChange('attachments', result.data.attachments || []);
-              alert(result.message || 'Datei erfolgreich hochgeladen');
+              showSnackbar(result.message || 'Datei erfolgreich hochgeladen', 'success');
             }
           } catch (parseError) {
             console.error('Error parsing response:', parseError);
-            alert('Fehler beim Verarbeiten der Server-Antwort');
+            showSnackbar('Fehler beim Verarbeiten der Server-Antwort', 'error');
           }
         } else {
           console.error('Upload failed with status:', xhr.status);
-          alert('Fehler beim Hochladen der Datei');
+          showSnackbar('Fehler beim Hochladen der Datei', 'error');
         }
       });      // Handle errors
       xhr.addEventListener('error', (error) => {
@@ -294,7 +296,7 @@ const LeadEditModal = ({
         setIsUploading(false);
         setUploadProgress(0);
         setUploadStatus('uploading');
-        alert('Fehler beim Hochladen der Datei');
+        showSnackbar('Fehler beim Hochladen der Datei', 'error');
       });
 
       // Handle abort
@@ -440,15 +442,15 @@ const LeadEditModal = ({
             const result = JSON.parse(xhr.responseText);
             if (result.success && result.data) {
               onFormChange('attachments', result.data.attachments || []);
-              alert(result.message || 'Datei erfolgreich hochgeladen');
+              showSnackbar(result.message || 'Datei erfolgreich hochgeladen', 'success');
             }
           } catch (parseError) {
             console.error('Error parsing response:', parseError);
-            alert('Fehler beim Verarbeiten der Server-Antwort');
+            showSnackbar('Fehler beim Verarbeiten der Server-Antwort', 'error');
           }
         } else {
           console.error('Upload failed with status:', xhr.status);
-          alert('Fehler beim Hochladen der Datei');
+          showSnackbar('Fehler beim Hochladen der Datei', 'error');
         }
       });      // Handle errors
       xhr.addEventListener('error', (error) => {
@@ -462,7 +464,7 @@ const LeadEditModal = ({
         setIsUploading(false);
         setUploadProgress(0);
         setUploadStatus('uploading');
-        alert('Fehler beim Hochladen der Datei');
+        showSnackbar('Fehler beim Hochladen der Datei', 'error');
       });
 
       // Handle abort
@@ -532,7 +534,7 @@ const LeadEditModal = ({
       
     } catch (error) {
       console.error('Error opening attachment:', error);
-      alert('Fehler beim Öffnen der Datei');
+      showSnackbar('Fehler beim Öffnen der Datei', 'error');
     } finally {
       // Remove loading state
       setDownloadingFiles(prev => {
@@ -566,14 +568,14 @@ const LeadEditModal = ({
         throw new Error('Delete failed');
       }      const result = await response.json();      // Update successful - show success message and update form data
       if (result.success && result.data) {
-        alert(result.message || 'Datei erfolgreich gelöscht');
+        showSnackbar(result.message || 'Datei erfolgreich gelöscht', 'success');
         // Update the form with new data (attachment list updated)
         onFormChange('attachments', result.data.attachments || []);
       }
       
     } catch (error) {
       console.error('Error deleting attachment:', error);
-      alert('Fehler beim Löschen der Datei');
+      showSnackbar('Fehler beim Löschen der Datei', 'error');
     } finally {
       // Remove loading state
       setDeletingFiles(prev => {

@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { leadApi } from '@/lib/api';
+import { useSnackbar } from '@/components/ui/snackbar';
 
 import {
   X,
@@ -25,6 +26,7 @@ type ModalProps = {
 };
 
 const AutomationModal = ({ open, onClose }: ModalProps) => {
+  const { showSnackbar } = useSnackbar();
   const [isMounted, setIsMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -150,10 +152,10 @@ const AutomationModal = ({ open, onClose }: ModalProps) => {
 
   const handleSubmitContact = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!salutation) return alert("Bitte wählen Sie eine Anrede aus.");
-    if (!name) return alert("Bitte geben Sie Ihren Namen ein.");
-    if (!email) return alert("Bitte geben Sie Ihre E-Mail-Adresse ein.");
-    if (!privacyAgreed) return alert("Bitte stimmen Sie den Datenschutzhinweisen zu.");
+    if (!salutation) return showSnackbar("Bitte wählen Sie eine Anrede aus.", 'error');
+    if (!name) return showSnackbar("Bitte geben Sie Ihren Namen ein.", 'error');
+    if (!email) return showSnackbar("Bitte geben Sie Ihre E-Mail-Adresse ein.", 'error');
+    if (!privacyAgreed) return showSnackbar("Bitte stimmen Sie den Datenschutzhinweisen zu.", 'error');
     
     setIsSubmitting(true);
     
@@ -182,14 +184,14 @@ const AutomationModal = ({ open, onClose }: ModalProps) => {
       const response = await leadApi.createLead(leadData);
       
       if (response.success) {
-        alert("Vielen Dank! Ihre Anfrage für ein Strategiegespräch wurde erfolgreich übermittelt. Wir melden uns in Kürze bei Ihnen.");
+        showSnackbar("Vielen Dank! Ihre Anfrage für ein Strategiegespräch wurde erfolgreich übermittelt. Wir melden uns in Kürze bei Ihnen.", 'success');
         handleClose();
       } else {
         throw new Error(response.message || 'Fehler beim Senden der Anfrage');
       }
     } catch (error) {
       console.error('Error submitting automation lead:', error);
-      alert("Es gab einen Fehler beim Senden Ihrer Anfrage. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.");
+      showSnackbar("Es gab einen Fehler beim Senden Ihrer Anfrage. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.", 'error');
     } finally {
       setIsSubmitting(false);
     }

@@ -12,13 +12,11 @@ const Layout = () => {
     window.scrollTo(0, 0);
     revealInit();
   }, [location.pathname]);
-
   return (
     <>
       <Helmet>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
-
       <Header />
       <main>
         <Outlet />

@@ -19,7 +19,8 @@ import {
   getLeadActivities,
   uploadAttachment,
   downloadAttachment,
-  deleteAttachment
+  deleteAttachment,
+  getRecentActivities
 } from '../controllers/leads.js';
 
 const router = express.Router();
@@ -40,6 +41,9 @@ router.route('/my-leads')
 
 router.route('/stats')
   .get(authorize('admin', 'vertrieb', 'kunde'), getLeadStats);
+
+router.route('/activities')
+  .get(authorize('admin', 'vertrieb', 'kunde'), getRecentActivities);
 
 router.route('/by-status')
   .get(authorize('admin', 'vertrieb', 'kunde'), getLeadsByStatus);

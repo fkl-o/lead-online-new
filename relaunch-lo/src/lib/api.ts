@@ -203,6 +203,11 @@ export const leadApi = {
   getLeadStats: async (): Promise<ApiResponse> => {
     return apiCall('/leads/stats');
   },
+
+  // Get recent activities
+  getRecentActivities: async (limit: number = 10): Promise<ApiResponse> => {
+    return apiCall(`/leads/activities?limit=${limit}`);
+  },
 };
 
 // Auth API functions
@@ -294,12 +299,12 @@ export const userApi = {
   // Get single user by ID
   getUser: async (id: string): Promise<ApiResponse> => {
     return apiCall(`/users/${id}`);
-  },
-  // Create new user
+  },  // Create new user
   createUser: async (userData: {
     name: string;
     email: string;
     password: string;
+    salutation?: 'herr' | 'frau' | null;
     role: 'admin' | 'vertrieb' | 'kunde' | 'lead';
     profile?: {
       company?: string;
@@ -314,11 +319,11 @@ export const userApi = {
       body: JSON.stringify(userData),
     });
   },
-
   // Update user
   updateUser: async (id: string, userData: Partial<{
     name: string;
     email: string;
+    salutation: 'herr' | 'frau' | null;
     role: 'admin' | 'vertrieb' | 'kunde' | 'lead';
     isActive: boolean;
     profile: {
@@ -366,6 +371,17 @@ export const userApi = {
     return apiCall(`/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ isActive }),
+    });
+  },
+
+  // Change password (for current user)
+  changePassword: async (passwordData: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<ApiResponse> => {
+    return apiCall('/auth/update-password', {
+      method: 'PUT',
+      body: JSON.stringify(passwordData),
     });
   },
 };
