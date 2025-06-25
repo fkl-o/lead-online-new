@@ -1,14 +1,16 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
-import { LogIn, Mail } from 'lucide-react';
+import { LogIn, Mail, LayoutDashboard, LogOut } from 'lucide-react';
 
 type MobileMenuProps = {
   isOpen: boolean;
   onClose: () => void;
+  isAuthenticated: boolean;
+  onLogout: () => void;
 };
 
-const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
+const MobileMenu = ({ isOpen, onClose, isAuthenticated, onLogout }: MobileMenuProps) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -83,9 +85,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
             isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
           }`}
           style={{ transitionDelay: isOpen ? '250ms' : '0ms' }}
-        />
-
-        <div
+        />        <div
           className={`pb-8 flex flex-col space-y-4 transition-all duration-300 ease-in-out ${
             isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
           }`}
@@ -97,12 +97,36 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
               <span>Kontakt aufnehmen</span>
             </Link>
           </Button>
-          <Button asChild size="lg" className="w-full bg-black hover:bg-gray-800 text-white font-semibold text-lg py-6 transition-all duration-200 hover:scale-105 active:scale-95">
-            <Link to="/login" onClick={onClose}>
-              <LogIn className="mr-2 h-5 w-5" />
-              <span>Kunden-Login</span>
-            </Link>
-          </Button>
+          
+          {isAuthenticated ? (
+            <div className="space-y-3">
+              <Button asChild size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg py-6 transition-all duration-200 hover:scale-105 active:scale-95">
+                <Link to="/dashboard" onClick={onClose}>
+                  <LayoutDashboard className="mr-2 h-5 w-5" />
+                  <span>Dashboard</span>
+                </Link>
+              </Button>
+              <Button 
+                onClick={() => {
+                  onLogout();
+                  onClose();
+                }}
+                size="lg" 
+                variant="outline"
+                className="w-full font-semibold text-lg py-6 transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <LogOut className="mr-2 h-5 w-5" />
+                <span>Abmelden</span>
+              </Button>
+            </div>
+          ) : (
+            <Button asChild size="lg" className="w-full bg-black hover:bg-gray-800 text-white font-semibold text-lg py-6 transition-all duration-200 hover:scale-105 active:scale-95">
+              <Link to="/login" onClick={onClose}>
+                <LogIn className="mr-2 h-5 w-5" />
+                <span>Kunden-Login</span>
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>

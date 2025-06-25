@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { 
@@ -19,9 +20,12 @@ import {
   Workflow,
   ChevronLeft,
   ChevronRight,
-  Home
+  Home,
+  LogOut,
+  ExternalLink
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { authApi } from '@/lib/api';
 
 interface MenuItem {
   id: string;
@@ -79,16 +83,34 @@ const menuItems: MenuSection[] = [
 
 const Sidebar = ({ currentView, onViewChange, user, className }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
   const isAdmin = user?.role === 'admin';
+
+  const handleLogout = async () => {
+    try {
+      // Clear localStorage and logout
+      authApi.logout();
+      // Navigate to home page
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still logout and navigate even if there's an error
+      authApi.logout();
+      navigate('/');
+    }
+  };
+
+  const handleBackToWebsite = () => {
+    navigate('/');
+  };
 
   const filteredMenuItems = menuItems.map(section => ({
     ...section,
     items: section.items.filter(item => !item.adminOnly || isAdmin)
   })).filter(section => section.items.length > 0);
-
   return (
     <div className={cn(
-      "bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-sm",
+      "bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-sm h-screen",
       collapsed ? "w-16" : "w-64",
       className
     )}>
@@ -137,10 +159,8 @@ const Sidebar = ({ currentView, onViewChange, user, className }: SidebarProps) =
             </div>
           </div>
         </div>
-      )}
-
-      {/* Navigation */}
-      <div className="flex-1 overflow-y-auto">
+      )}      {/* Navigation */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
         {filteredMenuItems.map((section) => (
           <div key={section.section} className="p-2">
             {!collapsed && (
@@ -211,18 +231,50 @@ const Sidebar = ({ currentView, onViewChange, user, className }: SidebarProps) =
             </nav>
           </div>
         ))}
-      </div>
+      </div>      {/* Footer with Action Buttons */}
+      <div className={cn(
+        "sticky bottom-0 bg-white border-t border-gray-200",
+        collapsed ? "p-2 space-y-2" : "p-4 space-y-3"
+      )}>
+        {/* Logout Button */}
+        <Button
+          variant="default"
+          className={cn(
+            "w-full bg-red-600 hover:bg-red-700 text-white",
+            collapsed ? "justify-center px-0" : "justify-start"
+          )}
+          onClick={handleLogout}
+          title={collapsed ? "Abmelden" : undefined}
+        >
+          <LogOut className={cn(
+            "h-4 w-4 shrink-0",
+            collapsed ? "" : "mr-3"
+          )} />
+          {!collapsed && <span>Abmelden</span>}
+        </Button>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
-        {!collapsed ? (
-          <div className="text-xs text-gray-500 text-center">
+        {/* Back to Website Button */}
+        <Button
+          variant="outline"
+          className={cn(
+            "w-full border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900",
+            collapsed ? "justify-center px-0" : "justify-start"
+          )}
+          onClick={handleBackToWebsite}
+          title={collapsed ? "Zurück zur Website" : undefined}
+        >
+          <ExternalLink className={cn(
+            "h-4 w-4 shrink-0",
+            collapsed ? "" : "mr-3"
+          )} />
+          {!collapsed && <span>Zurück zur Website</span>}
+        </Button>
+
+        {/* Version Info (only when not collapsed) */}
+        {!collapsed && (
+          <div className="text-xs text-gray-500 text-center pt-2">
             <p>Version 2.0.0</p>
             <p>© 2024 LeadGen Pro</p>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
           </div>
         )}
       </div>

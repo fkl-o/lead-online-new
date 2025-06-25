@@ -1,17 +1,50 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { Menu, Mail, LogIn, X } from "lucide-react";
+import { Menu, Mail, LogIn, X, LayoutDashboard, LogOut } from "lucide-react";
 import MobileMenu from "./MobileMenu";
+import { authApi } from "@/lib/api";
 
 const Header = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('user');
+      
+      if (token && userData) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+    
+    // Listen for auth changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'authToken' || e.key === 'user') {
+        checkAuth();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
   const handleContactClick = () => {
     window.scrollTo(0, 0);
+  };
+  const handleLogout = () => {
+    authApi.logout();
+    setIsAuthenticated(false);
+    navigate('/');
   };
 
   return (
@@ -32,20 +65,40 @@ const Header = () => {
             <Link to="/webentwicklung" className="text-slate-600 hover:text-slate-900 transition-colors">Webentwicklung</Link>
             <Link to="/marketing-automation" className="text-slate-600 hover:text-slate-900 transition-colors">Marketing Automation</Link>
             <Link to="/digitalization" className="text-slate-600 hover:text-slate-900 transition-colors">Digitalisierung</Link>
-          </nav>{/* Desktop CTA */}
-          <div className="hidden md:flex space-x-4">
+          </nav>          {/* Desktop CTA */}
+          <div className="hidden md:flex items-center space-x-4">
             <Button asChild className="bg-brand-600 hover:bg-brand-700 text-white font-semibold flex items-center space-x-2">
               <Link to="/contact" onClick={handleContactClick}>
                 <Mail className="w-4 h-4" />
                 <span>Kontakt</span>
               </Link>
             </Button>
-            <Button asChild className="bg-black hover:bg-gray-800 text-white font-semibold flex items-center space-x-2">
-              <Link to="/login">
-                <LogIn className="w-4 h-4" />
-                <span>Login</span>
-              </Link>
-            </Button>
+              {isAuthenticated ? (
+              <div className="flex items-center space-x-3">
+                <Button asChild className="bg-black hover:bg-gray-800 text-white font-semibold flex items-center space-x-2">
+                  <Link to="/dashboard">
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="ghost"
+                  size="sm"
+                  className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 p-2"
+                  title="Abmelden"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button asChild className="bg-black hover:bg-gray-800 text-white font-semibold flex items-center space-x-2">
+                <Link to="/login">
+                  <LogIn className="w-4 h-4" />
+                  <span>Login</span>
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -55,8 +108,12 @@ const Header = () => {
             </Button>
           </div>
         </div>
-      </header>
-      <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+      </header>      <MobileMenu 
+        isOpen={mobileMenuOpen} 
+        onClose={() => setMobileMenuOpen(false)}
+        isAuthenticated={isAuthenticated}
+        onLogout={handleLogout}
+      />
     </>
   );
 };
