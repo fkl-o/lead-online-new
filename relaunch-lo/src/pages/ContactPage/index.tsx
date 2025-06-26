@@ -25,9 +25,9 @@ const ContactPage = () => {
 	return (
 		<>
 			<SEOHead
-				title="Kontakt | LeadGen Pro"
-				description="Kontaktieren Sie LeadGen Pro für professionelle Webentwicklung, Marketing Automation und Digitalisierung. Wir freuen uns auf Ihre Nachricht!"
-				keywords={['Kontakt', 'Beratung', 'Webentwicklung', 'Marketing Automation', 'Deutschland']}
+				title="Kontakt | Kostenlose Beratung für Webentwicklung & Marketing | LeadGen Pro"
+				description="Kontaktieren Sie LeadGen Pro für professionelle Webentwicklung, Marketing Automation und Digitalisierung. Kostenlose Beratung und unverbindliches Angebot!"
+				keywords={['Kontakt', 'Beratung', 'Webentwicklung', 'Marketing Automation', 'Digitalisierung', 'Deutschland']}
 				structuredData={contactSchema}
 			/>
 			

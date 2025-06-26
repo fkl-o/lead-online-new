@@ -6,8 +6,9 @@ const PrivacyPolicy: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-16" role="main">
       <SEOHead
-        title="Datenschutzerklärung | LeadGen Pro"
-        description="Unsere Datenschutzerklärung erklärt, wie wir Ihre persönlichen Daten sammeln, verwenden und schützen."
+        title="Datenschutzerklärung | DSGVO-konforme Datenverarbeitung | LeadGen Pro"
+        description="Datenschutzerklärung von LeadGen Pro: Erfahren Sie, wie wir Ihre persönlichen Daten DSGVO-konform sammeln, verwenden und schützen."
+        keywords={['Datenschutzerklärung', 'DSGVO', 'Datenschutz', 'Datenverarbeitung', 'LeadGen Pro', 'Deutschland']}
       />
       
       <div className="max-w-4xl mx-auto px-6">

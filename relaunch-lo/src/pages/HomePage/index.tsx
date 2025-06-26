@@ -24,9 +24,9 @@ const HomePage = () => {
   return (
     <>
       <SEOHead
-        title="LeadGen Pro | Ihre Digitalagentur für Wachstum"
-        description="Als Ihr Partner für Webentwicklung, Marketing Automation und Digitalisierung schaffen wir nachhaltige Wettbewerbsvorteile und messbare Erfolge."
-        keywords={['Webentwicklung', 'Marketing Automation', 'Digitalisierung', 'Lead Generation', 'Deutschland']}
+        title="LeadGen Pro | Digitalagentur für Webentwicklung, Marketing & Digitalisierung"
+        description="Ihre Digitalagentur für nachhaltiges Wachstum: Professionelle Webentwicklung, Marketing Automation und Digitalisierung. Kostenlose Beratung & schnelle Umsetzung!"
+        keywords={['Digitalagentur', 'Webentwicklung', 'Marketing Automation', 'Digitalisierung', 'Lead Generation', 'Deutschland', 'Wachstum']}
         structuredData={[organizationSchema, webPageSchema]}
       />
       

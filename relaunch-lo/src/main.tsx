@@ -18,7 +18,6 @@ const MarketingAutomationLayout = lazy(() => import('./pages/MarketingAutomation
 const DigitalizationLayout = lazy(() => import('./pages/Digitalization/DigitalizationLayout'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
-const TestPage = lazy(() => import('./pages/TestPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Imprint = lazy(() => import('./pages/Imprint'));
@@ -95,10 +94,6 @@ const router = createBrowserRouter([
         </Suspense>
       </ProtectedRoute>
     )
-  },
-  { 
-    path: '/test', 
-    element: <TestPage />
   },
 ]);
 

@@ -6,8 +6,9 @@ const Imprint: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-16" role="main">
       <SEOHead
-        title="Impressum | LeadGen Pro"
-        description="Impressum und rechtliche Informationen zu LeadGen Pro - Ihrer Digitalagentur für Wachstum."
+        title="Impressum | Rechtliche Angaben & Kontaktdaten | LeadGen Pro"
+        description="Impressum und rechtliche Informationen zu LeadGen Pro - Ihrer Digitalagentur für Webentwicklung, Marketing Automation und Digitalisierung."
+        keywords={['Impressum', 'Rechtliche Angaben', 'Kontaktdaten', 'LeadGen Pro', 'Deutschland']}
       />
       
       <div className="max-w-4xl mx-auto px-6">
