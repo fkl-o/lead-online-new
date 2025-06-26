@@ -1,0 +1,117 @@
+// Types for PWA registration
+interface RegisterSWOptions {
+  immediate?: boolean;
+  onNeedRefresh?: () => void;
+  onOfflineReady?: () => void;
+  onRegistered?: (registration: ServiceWorkerRegistration | undefined) => void;
+  onRegisterError?: (error: any) => void;
+}
+
+interface PWARegistration {
+  updateSW: (reloadPage?: boolean) => Promise<void>;
+  needRefresh: [boolean, (value: boolean) => void];
+  offlineReady: [boolean, (value: boolean) => void];
+}
+
+// Safe PWA registration that works in all environments
+let updateSW: ((reloadPage?: boolean) => Promise<void>) | undefined;
+
+// Dynamic import function for virtual PWA module
+const getRegisterSW = async (): Promise<((options?: RegisterSWOptions) => (reloadPage?: boolean) => Promise<void>) | null> => {
+  try {
+    // This will work in production builds with PWA plugin
+    const pwaModule = await import('virtual:pwa-register');
+    return pwaModule.registerSW;
+  } catch (error) {
+    // Fallback for development or when PWA plugin is not available
+    console.log('ℹ️ PWA: virtual:pwa-register not available, using fallback');
+    return null;
+  }
+};
+
+export const initializePWA = async (): Promise<PWARegistration> => {
+  let needRefreshState = false;
+  let offlineReadyState = false;
+  
+  const setNeedRefresh = (value: boolean) => {
+    needRefreshState = value;
+    // Trigger custom event for UI updates
+    window.dispatchEvent(new CustomEvent('pwa-need-refresh', { detail: value }));
+  };
+  
+  const setOfflineReady = (value: boolean) => {
+    offlineReadyState = value;
+    // Trigger custom event for UI updates  
+    window.dispatchEvent(new CustomEvent('pwa-offline-ready', { detail: value }));
+  };
+
+  // Try to get the PWA registration function
+  const registerSW = await getRegisterSW();
+
+  // Only register PWA if the virtual module is available (production build)
+  if (registerSW) {
+    updateSW = registerSW({
+      onNeedRefresh() {
+        console.log('🔄 PWA: New content available, please refresh.');
+        setNeedRefresh(true);
+      },
+      onOfflineReady() {
+        console.log('✅ PWA: App ready to work offline.');
+        setOfflineReady(true);
+      },
+      onRegistered(r: ServiceWorkerRegistration | undefined) {
+        console.log('✅ PWA: Service worker registered successfully');
+        // Check for updates every hour
+        if (r) {
+          setInterval(() => {
+            r.update();
+          }, 60 * 60 * 1000); // 1 hour
+        }
+      },
+      onRegisterError(error: any) {
+        console.error('❌ PWA: Service worker registration failed', error);
+      },
+    });
+  } else {
+    console.log('ℹ️ PWA: Development mode - service worker not available');
+    // Create a no-op function for development
+    updateSW = () => Promise.resolve();
+  }
+
+  return {
+    updateSW: updateSW || (() => Promise.resolve()),
+    needRefresh: [needRefreshState, setNeedRefresh],
+    offlineReady: [offlineReadyState, setOfflineReady],
+  };
+};
+
+// Utility functions for offline detection
+export const isOnline = (): boolean => navigator.onLine;
+
+export const onlineStatus = {
+  subscribe: (callback: (online: boolean) => void) => {
+    const handleOnline = () => callback(true);
+    const handleOffline = () => callback(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    // Return unsubscribe function
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }
+};
+
+// Initialize PWA on module load
+if (typeof window !== 'undefined') {
+  // Register the PWA when the page loads
+  window.addEventListener('load', async () => {
+    try {
+      await initializePWA();
+    } catch (error) {
+      console.error('Failed to initialize PWA:', error);
+    }
+  });
+}

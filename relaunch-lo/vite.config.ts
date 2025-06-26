@@ -76,7 +76,7 @@ export default defineConfig({
           
           // Same-origin navigation - NetworkFirst with NavigationFallback
           {
-            urlPattern: ({ request }) => request.mode === 'navigate',
+            urlPattern: ({ request }: { request: any }) => request.mode === 'navigate',
             handler: 'NetworkFirst',
             options: {
               cacheName: 'navigation-cache',
