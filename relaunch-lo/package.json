@@ -9,14 +9,14 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:production",
+    "build": "vite build --mode production",
     "build:production": "vite build --mode production",
     "build:render": "bash render-build.sh",
     "build:fallback": "vite build --mode production --config vite.config.render.ts",
     "build:pwa": "powershell -ExecutionPolicy Bypass -File ./build-pwa.ps1",
-    "build:clean": "npm run clean; npm run build",
+    "build:clean": "yarn clean && yarn build",
     "start": "npx serve -s dist -p $PORT",
-    "preview": "npm run build; vite preview",
+    "preview": "yarn build && vite preview",
     "preview:serve": "npx serve -s dist -p $PORT",
     "lint": "eslint .",
     "test": "jest",
@@ -26,7 +26,7 @@
     "test:debug": "jest --detectOpenHandles --forceExit",
     "clean:windows": "if exist dist rmdir /s /q dist && if exist node_modules\\.vite rmdir /s /q node_modules\\.vite",
     "clean:unix": "rm -rf dist node_modules/.vite",
-    "clean": "npm run clean:windows || npm run clean:unix"
+    "clean": "yarn clean:windows || yarn clean:unix"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
