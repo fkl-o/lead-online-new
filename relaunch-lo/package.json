@@ -9,10 +9,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build --mode production",
-    "build:production": "vite build --mode production",
+    "build": "vite build",
+    "build:production": "vite build",
     "build:render": "bash render-build.sh",
-    "build:fallback": "vite build --mode production",
+    "build:fallback": "vite build",
     "build:pwa": "powershell -ExecutionPolicy Bypass -File ./build-pwa.ps1",
     "build:clean": "yarn clean && yarn build",
     "start": "npx serve -s dist -p $PORT",
