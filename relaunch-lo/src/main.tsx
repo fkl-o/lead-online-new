@@ -120,23 +120,40 @@ ReactDOM.createRoot(rootElement).render(
   </React.StrictMode>
 );
 
-// Service Worker komplett deaktiviert für statisches Hosting
-// Nur Cleanup für bestehende Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    registrations.forEach((registration) => {
-      registration.unregister();
-      console.log('�️ Existing Service Worker unregistered');
-    });
-  });
-  
-  // Caches manuell löschen
-  if ('caches' in window) {
-    caches.keys().then((cacheNames) => {
-      cacheNames.forEach((cacheName) => {
-        caches.delete(cacheName);
-        console.log('🗑️ Cache deleted:', cacheName);
+// PWA Service Worker Registration
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('✅ SW registered:', registration);
+        
+        // Check for updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New content available
+                console.log('🔄 New content available');
+              }
+            });
+          }
+        });
+      })
+      .catch((error) => {
+        console.log('❌ SW registration failed:', error);
       });
-    });
-  }
+  });
+}
+
+// Initialize Performance Monitoring
+if (import.meta.env.PROD) {
+  import('./lib/performance').then(({ PerformanceMonitor }) => {
+    PerformanceMonitor.getInstance();
+  });
+}
+
+// Load PWA Test Utils in development
+if (import.meta.env.DEV) {
+  import('./lib/pwa-test-utils');
 }

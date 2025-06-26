@@ -4,6 +4,9 @@ import { revealInit } from "../lib/reveal-init";
 import Header from "./Header";
 import Footer from "./Footer";
 import CookieBanner from "./CookieBanner";
+import { PWAInstallPrompt } from "./PWAInstallPrompt";
+import { PWAUpdatePrompt, PWAOfflineReady } from "./PWAUpdatePrompt";
+import { MobilePWANotification } from "./MobilePWANotification";
 import { Helmet } from "react-helmet-async";
 
 const Layout = () => {
@@ -49,6 +52,14 @@ const Layout = () => {
       
       {/* DSGVO Components */}
       <CookieBanner />
+      
+      {/* PWA Components */}
+      <PWAInstallPrompt />
+      <PWAUpdatePrompt />
+      <PWAOfflineReady />
+      
+      {/* Mobile PWA Installation Notification */}
+      <MobilePWANotification />
     </>
   );
 };

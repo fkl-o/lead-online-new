@@ -88,6 +88,7 @@ const Header = () => {
                   size="sm"
                   className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 p-2"
                   title="Abmelden"
+                  aria-label="Abmelden"
                 >
                   <LogOut className="w-4 h-4" />
                 </Button>
@@ -104,7 +105,14 @@ const Header = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={toggleMobileMenu} className="text-slate-800 z-50 relative">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleMobileMenu} 
+              className="text-slate-800 z-50 relative"
+              aria-label={mobileMenuOpen ? "Menü schließen" : "Menü öffnen"}
+              aria-expanded={mobileMenuOpen}
+            >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </Button>
           </div>

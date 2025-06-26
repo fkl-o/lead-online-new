@@ -1,0 +1,37 @@
+<!-- Icon Generation Script - Diese Datei kann mit einem Icon-Generator verwendet werden -->
+<!-- 
+Für die Icon-Generierung verwenden Sie:
+1. https://realfavicongenerator.net/ 
+2. https://app-manifest.firebaseapp.com/
+3. Oder verwenden Sie das untenstehende SVG als Basis
+
+Farben:
+- Primary: #be123c (Rose-700)
+- Background: #ffffff
+- Accent: #f1f5f9 (Slate-100)
+-->
+
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#ffffff" rx="64"/>
+  
+  <!-- Logo Container -->
+  <g transform="translate(64, 64)">
+    <!-- Main Circle -->
+    <circle cx="192" cy="192" r="160" fill="#be123c" stroke="#f1f5f9" stroke-width="8"/>
+    
+    <!-- Letter "L" -->
+    <path d="M 120 120 L 120 264 L 200 264 L 200 240 L 144 240 L 144 120 Z" fill="#ffffff"/>
+    
+    <!-- Letter "O" -->
+    <circle cx="240" cy="192" r="36" fill="none" stroke="#ffffff" stroke-width="24"/>
+    
+    <!-- Connecting Element -->
+    <rect x="200" y="180" width="40" height="24" fill="#ffffff"/>
+  </g>
+  
+  <!-- Subtitle -->
+  <text x="256" y="420" font-family="Inter, sans-serif" font-size="24" font-weight="600" text-anchor="middle" fill="#be123c">
+    LEAD ONLINE
+  </text>
+</svg>

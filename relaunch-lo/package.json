@@ -10,9 +10,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build --mode production",
+    "build:pwa": "powershell -ExecutionPolicy Bypass -File ./build-pwa.ps1",
     "build:clean": "npm run clean && npm run build",
     "start": "npx serve -s dist -p $PORT",
-    "preview": "npx serve -s dist -p $PORT",
+    "preview": "npm run build && vite preview",
+    "preview:serve": "npx serve -s dist -p $PORT",
     "lint": "eslint .",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -75,6 +77,8 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.10",
     "vaul": "^1.1.2",
+    "vite-plugin-pwa": "^1.0.0",
+    "workbox-window": "^7.3.0",
     "zod": "^3.25.67"
   },
   "devDependencies": {
