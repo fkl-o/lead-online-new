@@ -11,10 +11,12 @@
     "dev": "vite",
     "build": "npm run build:production",
     "build:production": "vite build --mode production",
+    "build:render": "bash render-build.sh",
+    "build:fallback": "vite build --mode production --config vite.config.render.ts",
     "build:pwa": "powershell -ExecutionPolicy Bypass -File ./build-pwa.ps1",
-    "build:clean": "npm run clean && npm run build",
+    "build:clean": "npm run clean; npm run build",
     "start": "npx serve -s dist -p $PORT",
-    "preview": "npm run build && vite preview",
+    "preview": "npm run build; vite preview",
     "preview:serve": "npx serve -s dist -p $PORT",
     "lint": "eslint .",
     "test": "jest",
@@ -77,19 +79,15 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.10",
     "vaul": "^1.1.2",
-    "vite": "^6.3.5",
-    "vite-plugin-pwa": "^1.0.0",
     "workbox-window": "^7.3.0",
-    "zod": "^3.25.67",
-    "@vitejs/plugin-react-swc": "^3.9.0",
-    "@tailwindcss/vite": "^4.1.10",
-    "typescript": "~5.8.3"
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@jest/globals": "^30.0.3",
     "@swc/core": "^1.12.7",
     "@swc/jest": "^0.2.38",
+    "@tailwindcss/vite": "^4.1.10",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -98,6 +96,8 @@
     "@types/node": "^24.0.3",
     "@types/react": "^18.0.38",
     "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react-swc": "^3.9.0",
+    "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
@@ -106,7 +106,9 @@
     "jest-environment-jsdom": "^30.0.2",
     "serve": "^14.2.4",
     "tw-animate-css": "^1.3.4",
+    "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
-    "eslint": "^9.25.0"
+    "vite": "^6.3.5",
+    "vite-plugin-pwa": "^1.0.0"
   }
 }
