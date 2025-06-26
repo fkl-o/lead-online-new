@@ -6,13 +6,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LeadGen Pro | Ihre Digitalagentur für Wachstum</title>
     
-    <!-- Google Fonts: Inter -->
+    <!-- Performance optimizations -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    
+    <!-- Optimized Google Fonts: Inter with font-display swap -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Critical CSS inline optimization hint -->
+    <style>
+      /* Critical CSS for above-the-fold content */
+      body { 
+        margin: 0; 
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      /* Prevent layout shift with loading placeholder */
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* Fixed loading spinner */
+      .loading-spinner {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        border: 3px solid #f3f4f6;
+        border-top: 3px solid #be123c;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+      
+      @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+    </style>
+    
+    <!-- Prevent SES issues by setting environment early -->
+    <script>
+      // Prevent lockdown-related issues
+      if (typeof globalThis !== 'undefined') {
+        globalThis.process = globalThis.process || { env: { NODE_ENV: 'production' } };
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Loading spinner for initial page load -->
+      <div class="loading-spinner" id="initial-loading"></div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -17,8 +17,8 @@ import {
   Users
 } from "lucide-react";
 
-// Einheitlicher Button-Style - bleibt unverändert
-const buttonStyle = "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600/100 data-[state=on]:shadow-[0_0_0_2px_#be123c] transition-all duration-200 ease-in-out";
+// Einheitlicher Button-Style mit sofortigem aktivem Zustand
+const buttonStyle = "h-12 border-2 border-brand-600/20 hover:border-brand-600/40 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600 transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:box-shadow-none";
 
 type ModalProps = {
   open: boolean;
@@ -209,7 +209,7 @@ const AutomationModal = ({ open, onClose }: ModalProps) => {
         onClick={stopPropagation}
         // max-w-full auf kleinen Screens für maximale Breite, sm:max-w-2xl für größere
         // min-w-[300px] hinzugefügt, um auf sehr kleinen Geräten eine Mindestbreite zu gewährleisten
-        className={`bg-white rounded-xl shadow-2xl p-4 sm:p-6 w-full max-w-full sm:max-w-2xl min-w-[300px] flex flex-col overflow-hidden max-h-[95vh] transform transition-all duration-300 ${isVisible ? 'scale-100' : 'scale-95'}`}
+        className={`modal-container bg-white rounded-xl shadow-2xl p-4 sm:p-6 w-full max-w-full sm:max-w-2xl min-w-[300px] flex flex-col overflow-hidden max-h-[95vh] transform transition-all duration-300 ${isVisible ? 'scale-100' : 'scale-95'}`}
       >
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
@@ -533,19 +533,23 @@ const AutomationModal = ({ open, onClose }: ModalProps) => {
                   <Label htmlFor="privacy-contact" className="text-xs text-slate-700 cursor-pointer">
                     Ich habe die Datenschutzhinweise gelesen und stimme der Verarbeitung meiner Daten zu.
                   </Label>
-                </div>                {/* Submit Contact */}
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 px-3 rounded-lg transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Sparkles className="h-4 w-4 mr-1" />
-                  {isSubmitting ? 'Wird gesendet...' : 'Strategiegespräch anfordern'}
-                </Button>
+                </div>
               </form>
             </div>
           </div>
         </ScrollArea>
+        
+        {/* Sticky Submit Button */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 mt-auto">
+          <Button
+            onClick={handleSubmitContact}
+            disabled={isSubmitting}
+            className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-6 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Sparkles className="h-5 w-5 mr-2" />
+            {isSubmitting ? 'Wird gesendet...' : 'Strategiegespräch anfordern'}
+          </Button>
+        </div>
       </div>
     </div>
   );

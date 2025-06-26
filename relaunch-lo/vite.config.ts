@@ -13,78 +13,68 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Base URL for assets - important for Render deployment
+  base: '/',
+  define: {
+    // Fix for SES issues on some platforms
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
+  },
   build: {
-    target: 'esnext',
+    target: 'es2020',
     minify: 'esbuild',
+    sourcemap: false, // Disable sourcemaps in production
+    cssCodeSplit: true, // Split CSS into separate files
+    // Optimize asset size limits
+    assetsInlineLimit: 4096, // 4kb - inline smaller assets
     rollupOptions: {
       output: {
+        // Simplified code splitting to avoid bundling issues
         manualChunks: {
-          // Vendor libraries
-          vendor: ['react', 'react-dom'],
-          'react-router': ['react-router-dom'],
-          
-          // Dashboard - separate chunk for lazy loading
-          dashboard: [
-            './src/pages/Dashboard/index.tsx',
-            './src/pages/Dashboard/components/Overview.tsx',
-            './src/pages/Dashboard/components/StatsCards.tsx',
-            './src/pages/Dashboard/components/LeadsTable.tsx',
-            './src/pages/Dashboard/components/UserManagement.tsx',
-            './src/pages/Dashboard/components/CompanyManagement.tsx'
-          ],
-          
-          // UI libraries
-          'radix-ui': [
+          'react-vendor': ['react', 'react-dom'],
+          'router': ['react-router-dom'],
+          'ui-vendor': [
             '@radix-ui/react-dialog',
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-alert-dialog',
-            '@radix-ui/react-aspect-ratio',
-            '@radix-ui/react-avatar',
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-collapsible',
-            '@radix-ui/react-context-menu',
             '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-hover-card',
-            '@radix-ui/react-label',
-            '@radix-ui/react-menubar',
-            '@radix-ui/react-navigation-menu',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-progress',
-            '@radix-ui/react-radio-group',
-            '@radix-ui/react-scroll-area',
-            '@radix-ui/react-select',
-            '@radix-ui/react-separator',
-            '@radix-ui/react-slider',
-            '@radix-ui/react-slot',
-            '@radix-ui/react-switch',
+            '@radix-ui/react-accordion',
             '@radix-ui/react-tabs',
-            '@radix-ui/react-toggle',
-            '@radix-ui/react-toggle-group',
-            '@radix-ui/react-tooltip'
-          ],
-            // Animation libraries (removed framer-motion)
-          // 'animation': ['framer-motion'],
-            // Icon libraries
-          'icons': ['lucide-react'],
-          
-          // Form libraries
-          'forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          
-          // Utility libraries
-          'utils': ['class-variance-authority', 'clsx', 'tailwind-merge', 'date-fns']
+            'lucide-react'
+          ]
+        },
+        // Optimize chunk file names with more stable hashing
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name?.split('.') || [];
+          const ext = info[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+            return `assets/images/[name]-[hash][extname]`;
+          }
+          if (/css/i.test(ext)) {
+            return `assets/css/[name]-[hash][extname]`;
+          }
+          return `assets/[name]-[hash][extname]`;
         },
       },
     },
-    chunkSizeWarningLimit: 1000, // Increase warning limit to 1000kb
+    chunkSizeWarningLimit: 500, // Reduce chunk size warning
+    // Enable compression
+    reportCompressedSize: true,
+    // Ensure proper asset handling for static hosting
+    emptyOutDir: true,
   },
   server: {
-    host: "0.0.0.0",          // wichtig für Render, damit der Server extern erreichbar ist
-    port: 3000,               // Render erwartet oft Port 3000
-    allowedHosts: ["relaunch-lo.onrender.com"],  // hier deine Render-Domain erlauben
+    host: "0.0.0.0",
+    port: 3000,
   },
   preview: {
     host: "0.0.0.0",
     port: 3000,
-    allowedHosts: ["relaunch-lo.onrender.com"],  // gleiche Freigabe auch für "vite preview"
+    allowedHosts: [
+      "localhost",
+      "127.0.0.1",
+      "0.0.0.0",
+      "relaunch-lo.onrender.com",
+      ".onrender.com"
+    ]
   },
 });

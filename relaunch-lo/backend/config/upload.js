@@ -1,15 +1,17 @@
 import multer from 'multer';
-import AWS from 'aws-sdk';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import path from 'path';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-// AWS S3 Konfiguration
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+// AWS S3 Client Konfiguration (v3)
+const s3 = new S3Client({
   region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
 });
 
 console.log('✅ S3 Configuration:', {
@@ -42,19 +44,28 @@ export const upload = multer({
   }
 });
 
-// S3 Upload Funktion ohne ACL
+// S3 Upload Funktion mit AWS SDK v3
 export const uploadToS3 = async (file, fileName) => {
   const params = {
     Bucket: process.env.S3_BUCKET_NAME,
     Key: fileName,
     Body: file.buffer,
     ContentType: file.mimetype,
-    // KEINE ACL Parameter!
   };
 
   try {
-    const result = await s3.upload(params).promise();
-    return result;
+    const command = new PutObjectCommand(params);
+    const result = await s3.send(command);
+    
+    // AWS SDK v3 gibt keine Location zurück, wir erstellen sie selbst
+    const location = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+    
+    return {
+      ...result,
+      Location: location,
+      Key: fileName,
+      Bucket: process.env.S3_BUCKET_NAME
+    };
   } catch (error) {
     console.error('S3 Upload Error:', error);
     throw error;

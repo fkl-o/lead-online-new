@@ -1,4 +1,5 @@
 import { useScrollReveal } from '../hooks/use-scroll-reveal';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const mainRef = useScrollReveal();
@@ -35,8 +36,16 @@ const Footer = () => {
                     <div>
                         <h4 className="font-semibold text-white mb-4">Rechtliches</h4>
                         <ul className="space-y-2">
-                            <li><a href="#" className="text-slate-400 hover:text-white">Impressum</a></li>
-                            <li><a href="#" className="text-slate-400 hover:text-white">Datenschutz</a></li>
+                            <li>
+                                <Link to="/impressum" className="text-slate-400 hover:text-white">
+                                    Impressum
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/datenschutz" className="text-slate-400 hover:text-white">
+                                    Datenschutz
+                                </Link>
+                            </li>
                         </ul>
                     </div>
                 </div>

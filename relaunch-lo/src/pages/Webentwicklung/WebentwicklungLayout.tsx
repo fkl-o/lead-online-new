@@ -1,5 +1,5 @@
 import { useState, Suspense, lazy } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { SEOHead, createServiceSchema } from '../../components/SEOHead';
 import WebentwicklungPage from './index';
 
 // Lazy load modal component
@@ -16,16 +16,21 @@ const WebentwicklungLayout = () => {
     setActiveModal(null);
   };
 
+  const webDevelopmentSchema = createServiceSchema(
+    "Webentwicklung",
+    "Professionelle Webentwicklung und digitale Lösungen für moderne, responsive Websites und Webanwendungen"
+  );
+
   return (
     <>
-      <Helmet>
-        <title>Webentwicklung | LeadGen Pro</title>
-        <meta 
-          name="description" 
-          content="Professionelle Webentwicklung und digitale Lösungen für Ihr Unternehmen. Moderne, responsive Websites und Webanwendungen." 
-        />
-      </Helmet>
-        <WebentwicklungPage onOpenModal={handleOpenModal} />
+      <SEOHead
+        title="Webentwicklung | LeadGen Pro"
+        description="Professionelle Webentwicklung und digitale Lösungen für Ihr Unternehmen. Moderne, responsive Websites und Webanwendungen."
+        keywords={['Webentwicklung', 'Website erstellen', 'React', 'Frontend', 'Backend', 'Deutschland']}
+        structuredData={webDevelopmentSchema}
+      />
+      
+      <WebentwicklungPage onOpenModal={handleOpenModal} />
 
       {/* Lazy-loaded modal */}
       {activeModal === 'website' && (

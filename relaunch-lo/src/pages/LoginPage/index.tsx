@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { authApi } from '../../lib/api';
+import { SEOHead } from '../../components/SEOHead';
+import { SecurityUtils } from '../../lib/security';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const LoginPage: React.FC = () => {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{email?: string; password?: string; general?: string}>({});
 
   // Get the intended destination or default to dashboard
   const from = (location.state as any)?.from?.pathname || '/dashboard';
@@ -27,34 +29,67 @@ const LoginPage: React.FC = () => {
       navigate(from, { replace: true });
     }
   }, [navigate, from]);
+
+  const validateForm = () => {
+    const newErrors: {email?: string; password?: string} = {};
+    
+    if (!SecurityUtils.validateEmail(email)) {
+      newErrors.email = 'Bitte geben Sie eine gültige E-Mail-Adresse ein';
+    }
+    
+    if (!isForgotPassword && password.length < 6) {
+      newErrors.password = 'Das Passwort muss mindestens 6 Zeichen lang sein';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setMessage('');
+    setErrors({});
+
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
-      const response = await authApi.login({ email, password });
-        if (response.success) {
+      const response = await authApi.login({ 
+        email: SecurityUtils.escapeString(email), 
+        password: SecurityUtils.escapeString(password) 
+      });
+      
+      if (response.success) {
         setMessage('Login erfolgreich! Sie werden weitergeleitet...');
         setTimeout(() => {
           navigate(from, { replace: true });
         }, 1000);
       } else {
-        setMessage(response.message || 'Login fehlgeschlagen');
+        setErrors({ general: response.message || 'Login fehlgeschlagen' });
       }
     } catch (error) {
       console.error('Login error:', error);
-      setMessage('Es gab einen Fehler beim Login. Bitte versuchen Sie es erneut.');
+      setErrors({ general: 'Es gab einen Fehler beim Login. Bitte versuchen Sie es erneut.' });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Passwort zurücksetzen simulieren (keine echte API)
-  const handleForgotPasswordSubmit = (e: React.FormEvent) => {
+  // Passwort zurücksetzen
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setMessage('');
+    setErrors({});
+    
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
+    }
+    
     // Simuliere API-Aufruf
     setTimeout(() => {
       setIsSubmitting(false);
@@ -63,40 +98,79 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Helmet>
-        <title>Anmelden | LeadGen Pro</title>
-      </Helmet>
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50" role="main">
+      <SEOHead
+        title={`${isForgotPassword ? 'Passwort vergessen' : 'Anmelden'} | LeadGen Pro`}
+        description="Melden Sie sich in Ihrem LeadGen Pro Konto an"
+        noindex={true}
+      />
+      
+      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow" role="form">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h1 className="mt-6 text-3xl font-bold text-gray-900">
             {isForgotPassword ? 'Passwort vergessen' : 'Anmelden'}
-          </h2>
+          </h1>
           <p className="mt-2 text-sm text-gray-600">
             {isForgotPassword ? 'Geben Sie Ihre E-Mail ein.' : 'Geben Sie Ihre E-Mail und Ihr Passwort ein.'}
           </p>
         </div>
+        
         {isForgotPassword ? (
-          <form className="mt-8 space-y-6" onSubmit={handleForgotPasswordSubmit}>
+          <form className="mt-8 space-y-6" onSubmit={handleForgotPasswordSubmit} noValidate>
             <div>
-              <label htmlFor="email" className="sr-only">E-Mail-Adresse</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                E-Mail-Adresse
+              </label>
               <Input
-                id="email" name="email" type="email" required
-                placeholder="E-Mail-Adresse"
-                value={email} onChange={e => setEmail(e.target.value)}
+                id="email" 
+                name="email" 
+                type="email" 
+                required
+                placeholder="ihre@email.de"
+                value={email} 
+                onChange={e => setEmail(e.target.value)}
+                aria-invalid={errors.email ? 'true' : 'false'}
+                aria-describedby={errors.email ? 'email-error' : undefined}
+                className={errors.email ? 'border-red-500' : ''}
               />
+              {errors.email && (
+                <p id="email-error" className="mt-1 text-sm text-red-600" role="alert">
+                  {errors.email}
+                </p>
+              )}
             </div>
-            {message && <p className="text-sm text-center text-gray-700">{message}</p>}
+            
+            {message && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-md" role="status">
+                <p className="text-sm text-green-700">{message}</p>
+              </div>
+            )}
+            
+            {errors.general && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md" role="alert">
+                <p className="text-sm text-red-700">{errors.general}</p>
+              </div>
+            )}
+            
             <Button
-              type="submit" disabled={isSubmitting}
-              className="w-full py-2 px-4 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded"
+              type="submit" 
+              disabled={isSubmitting}
+              className="w-full py-2 px-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-medium rounded"
+              aria-describedby="submit-help"
             >
               {isSubmitting ? 'Senden...' : 'Link senden'}
             </Button>
+            <p id="submit-help" className="sr-only">
+              Klicken Sie hier, um den Reset-Link zu senden
+            </p>
+            
             <Button
-              type="button" onClick={() => setIsForgotPassword(false)}
+              type="button" 
+              onClick={() => setIsForgotPassword(false)}
               className="w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded"
-            >Zurück zum Login</Button>
+            >
+              Zurück zum Login
+            </Button>
           </form>
         ) : (
           <form className="mt-8 space-y-6" onSubmit={handleLoginSubmit}>
@@ -135,7 +209,7 @@ const LoginPage: React.FC = () => {
                     id="remember-me"
                     name="remember-me"
                     type="checkbox"
-                    className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+                    className="h-3 w-3 text-brand-600 focus:ring-brand-500 focus:ring-1 border-gray-300 rounded"
                   />
                   <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                     Angemeldet bleiben

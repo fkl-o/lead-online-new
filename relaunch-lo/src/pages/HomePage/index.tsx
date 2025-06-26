@@ -1,5 +1,5 @@
 import { useState, Suspense, lazy } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { SEOHead, createOrganizationSchema, createWebPageSchema } from '../../components/SEOHead';
 import HeroSection from './components/HeroSection';
 import ServicesSection from './components/ServicesSection';
 import TrustSection from './components/TrustSection';
@@ -14,19 +14,26 @@ const DigitalizationModal = lazy(() => import('../../components/modals/Digitaliz
 const HomePage = () => {
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
+  // SEO Structured Data
+  const organizationSchema = createOrganizationSchema();
+  const webPageSchema = createWebPageSchema(
+    "LeadGen Pro - Ihre Digitalagentur für Wachstum",
+    "Als Ihr Partner für Webentwicklung, Marketing Automation und Digitalisierung schaffen wir nachhaltige Wettbewerbsvorteile und messbare Erfolge."
+  );
+
   return (
     <>
-      <Helmet>
-        <title>LeadGen Pro | Ihre Digitalagentur für Wachstum</title>
-        <meta 
-          name="description" 
-          content="Als Ihr Partner für Webentwicklung, Marketing Automation und Digitalisierung schaffen wir nachhaltige Wettbewerbsvorteile und messbare Erfolge." 
-        />
-      </Helmet>
+      <SEOHead
+        title="LeadGen Pro | Ihre Digitalagentur für Wachstum"
+        description="Als Ihr Partner für Webentwicklung, Marketing Automation und Digitalisierung schaffen wir nachhaltige Wettbewerbsvorteile und messbare Erfolge."
+        keywords={['Webentwicklung', 'Marketing Automation', 'Digitalisierung', 'Lead Generation', 'Deutschland']}
+        structuredData={[organizationSchema, webPageSchema]}
+      />
       
       <HeroSection />
       <ServicesSection onOpenModal={setActiveModal} /> 
-      <TrustSection />      <ProcessSection />
+      <TrustSection />
+      <ProcessSection />
       <CallToActionSection />
 
       {/* Lazy-loaded modals with Suspense */}

@@ -19,8 +19,8 @@ import {
 import { leadApi } from '@/lib/api';
 import { useSnackbar } from '@/components/ui/snackbar';
 
-// Einheitlicher Button-Style
-const buttonStyle = "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600/100 data-[state=on]:shadow-[0_0_0_2px_#be123c] transition-all duration-200 ease-in-out";
+// Einheitlicher Button-Style mit sofortigem aktivem Zustand
+const buttonStyle = "h-12 border-2 border-brand-600/20 hover:border-brand-600/40 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600 transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:box-shadow-none";
 
 type ModalProps = {
   open: boolean;
@@ -166,7 +166,7 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
     >
       <div
         onClick={stopPropagation}
-        className={`bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-2xl w-full flex flex-col overflow-hidden max-h-[90vh] transform transition-all duration-300 ${isVisible ? 'scale-100' : 'scale-95'}`}
+        className={`modal-container bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-2xl w-full flex flex-col overflow-hidden max-h-[90vh] transform transition-all duration-300 ${isVisible ? 'scale-100' : 'scale-95'}`}
       >
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2">
@@ -313,29 +313,33 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
               </div>
 
               {/* Datenschutz */}
-              <div className="flex items-start space-x-3 bg-rose-50 p-3 rounded-lg border border-brand-600/20">
+              <div className="flex items-start space-x-2 bg-rose-50 p-2 rounded-lg border border-brand-600/20">
                 <Checkbox
                   id="privacy"
                   checked={privacyAgreed}
                   onCheckedChange={(checked) => setPrivacyAgreed(!!checked)}
                   required
-                  className="h-5 w-5 mt-0.5"
+                  className="h-4 w-4 mt-0.5"
                 />
-                <Label htmlFor="privacy" className="text-sm text-slate-700 cursor-pointer">
+                <Label htmlFor="privacy" className="text-xs text-slate-700 cursor-pointer">
                   Ich habe die Datenschutzhinweise gelesen und stimme der Verarbeitung meiner Daten zu.
                 </Label>
-              </div>              {/* Submit */}
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-6 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Sparkles className="h-5 w-5 mr-2" />
-                {isSubmitting ? 'Wird gesendet...' : 'Gespräch anfordern'}
-              </Button>
+              </div>
             </form>
           </div>
         </ScrollArea>
+        
+        {/* Sticky Submit Button */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 mt-auto">
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-6 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Sparkles className="h-5 w-5 mr-2" />
+            {isSubmitting ? 'Wird gesendet...' : 'Gespräch anfordern'}
+          </Button>
+        </div>
       </div>
     </div>
   );

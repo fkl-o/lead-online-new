@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { userApi } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,7 @@ import {
 import { useSnackbar } from '@/components/ui/snackbar';
 
 // Einheitlicher Button-Style für Modals
-const buttonStyle = "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600/100 data-[state=on]:shadow-[0_0_0_2px_#be123c] transition-all duration-200 ease-in-out";
+const buttonStyle = "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600 transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:ring-offset-2";
 
 type SelectableButtonProps = {
   icon?: React.ReactNode;
@@ -92,9 +92,13 @@ interface UserManagementProps {
   currentUser: any;
 }
 
+// Singleton-Pattern: Globaler State um zu verhindern, dass Daten mehrfach geladen werden
+let globalUsersCache: User[] | null = null;
+let globalUsersLoaded: boolean = false;
+
 const UserManagement = ({ currentUser }: UserManagementProps) => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<User[]>(globalUsersCache || []);
+  const [loading, setLoading] = useState(globalUsersCache === null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -104,7 +108,10 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
   const [isPasswordResetModalOpen, setIsPasswordResetModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');// Form states
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [modalPersist, setModalPersist] = useState(false); // Prevent accidental closing during snackbar
+
+// Form states
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -123,28 +130,38 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
   const isAdmin = currentUser?.role === 'admin';
   const { showSnackbar } = useSnackbar();
+
+  // Modal lifecycle management - Manage body overflow für bessere UX
+  useEffect(() => {
+    if (isCreateModalOpen || isEditModalOpen || isActionsModalOpen || isPasswordResetModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    // Cleanup auf Unmount
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isCreateModalOpen, isEditModalOpen, isActionsModalOpen, isPasswordResetModalOpen]);
   // Load users from API
   const loadUsers = async () => {
     if (!isAdmin) return;
     
     try {
       setLoading(true);
-      console.log('Lade Benutzer mit Filtern:', { filterRole, filterStatus, searchQuery });
       
       const response = await userApi.getUsers({
         page: 1,
         limit: 50,
-        role: filterRole !== 'all' ? filterRole : undefined,
-        isActive: filterStatus !== 'all' ? filterStatus === 'active' : undefined,
-        search: searchQuery || undefined,
         sortBy: '-createdAt'
       });
 
-      console.log('API Response:', response);
-
       if (response.success) {
-        console.log('Geladene Benutzer:', response.data);
-        setUsers(response.data || []);
+        const userData = response.data || [];
+        setUsers(userData);
+        // Update global cache
+        globalUsersCache = userData;
       } else {
         console.error('Failed to load users:', response.message);
       }
@@ -155,9 +172,44 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     }
   };
 
+  // Safe modal close handler that respects persist state
+  const handleModalClose = (modalType: 'create' | 'edit' | 'actions' | 'password', e?: React.MouseEvent) => {
+    // VERY strict checking - only close if it's a real user click on the overlay
+    if (!e) return; // No event means programmatic call - don't close
+    if (e.target !== e.currentTarget) return; // Clicked on modal content - don't close
+    if (modalPersist) return; // In persist mode - don't close
+    
+    // Additional safety check - ensure the click was on the backdrop
+    const target = e.target as HTMLElement;
+    if (!target.classList.contains('fixed') || !target.classList.contains('inset-0')) {
+      return; // Not clicking on the backdrop - don't close
+    }
+    
+    console.log(`🔒 Safe modal close triggered for: ${modalType}`);
+    
+    switch (modalType) {
+      case 'create':
+        setIsCreateModalOpen(false);
+        break;
+      case 'edit':
+        setIsEditModalOpen(false);
+        break;
+      case 'actions':
+        setIsActionsModalOpen(false);
+        break;
+      case 'password':
+        setIsPasswordResetModalOpen(false);
+        break;
+    }
+  };
+
   useEffect(() => {
-    loadUsers();
-  }, [filterRole, filterStatus, searchQuery, isAdmin]);
+    // Nur beim ersten Mount laden, wenn der Benutzer Admin ist und noch nicht geladen wurde
+    if (currentUser?.role === 'admin' && !globalUsersLoaded) {
+      globalUsersLoaded = true;
+      loadUsers();
+    }
+  }, []); // Leere Dependency Array - nur beim Mount ausführen
 
   // Filter users based on search and filters
   const filteredUsers = users.filter(user => {
@@ -171,6 +223,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     return matchesSearch && matchesRole && matchesStatus;
   });  const handleCreateUser = async () => {
     try {
+      setModalPersist(true); // Prevent modal from closing during operation
       const response = await userApi.createUser({
         name: formData.name,
         email: formData.email,
@@ -181,43 +234,62 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       });
       if (response.success) {
         showSnackbar('Benutzer erfolgreich erstellt!', 'success');
-        setTimeout(() => {
-          setIsCreateModalOpen(false);
-          resetForm();
-          loadUsers();
-        }, 300);
+        
+        // Füge den neuen Benutzer zur lokalen Liste hinzu ohne erneuten API-Aufruf
+        const updatedUsers = [response.data, ...users];
+        setUsers(updatedUsers);
+        // Update global cache
+        globalUsersCache = updatedUsers;
+        
+        // Modal sofort schließen ohne Delay -> geändert zu Delay für bessere UX
+        setIsCreateModalOpen(false);
+        resetForm();
       } else {
         showSnackbar(response.message || 'Fehler beim Erstellen des Benutzers', 'error');
       }
     } catch (error) {
       console.error('Error creating user:', error);
       showSnackbar('Fehler beim Erstellen des Benutzers', 'error');
+    } finally {
+      setModalPersist(false); // Re-enable modal closing
     }
   };  const handleUpdateUser = async () => {
     if (!selectedUser) return;
     try {
+      setModalPersist(true); // Prevent modal from closing during operation
       const response = await userApi.updateUser(selectedUser._id, {
         name: formData.name,
         email: formData.email,
         salutation: formData.salutation,
         role: formData.role,
-        isActive: formData.isActive,
+        // isActive wird über separate Toggle-Funktion verwaltet, nicht hier
         profile: formData.profile
       });
       if (response.success) {
         showSnackbar('Benutzer erfolgreich aktualisiert!', 'success');
-        setTimeout(() => {
-          setIsEditModalOpen(false);
-          setSelectedUser(null);
-          resetForm();
-          loadUsers();
-        }, 300);
+        
+        // Aktualisiere den Benutzer in der lokalen Liste ohne erneuten API-Aufruf
+        const updatedUsers = users.map(user => 
+          user._id === selectedUser._id 
+            ? { ...user, ...response.data }
+            : user
+        );
+        setUsers(updatedUsers);
+        // Update global cache
+        globalUsersCache = updatedUsers;
+        
+        // Modal sofort schließen ohne Delay -> geändert zu Delay für bessere UX
+        setIsEditModalOpen(false);
+        setSelectedUser(null);
+        resetForm();
       } else {
         showSnackbar(response.message || 'Fehler beim Aktualisieren des Benutzers', 'error');
       }
     } catch (error) {
       console.error('Error updating user:', error);
       showSnackbar('Fehler beim Aktualisieren des Benutzers', 'error');
+    } finally {
+      setModalPersist(false); // Re-enable modal closing
     }
   };  const handleDeleteUser = async (userId: string) => {
     if (!confirm('Sind Sie sicher, dass Sie diesen Benutzer deaktivieren möchten? (Der Benutzer wird nicht gelöscht, sondern nur deaktiviert)')) return;
@@ -225,11 +297,13 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       setIsDeleting(userId);
       const response = await userApi.deleteUser(userId);
       if (response.success) {
-        setUsers(prevUsers => prevUsers.map(user => user._id === userId ? { ...user, isActive: false } : user));
+        const updatedUsers = users.map(user => user._id === userId ? { ...user, isActive: false } : user);
+        setUsers(updatedUsers);
+        // Update global cache
+        globalUsersCache = updatedUsers;
+        showSnackbar('Benutzer erfolgreich deaktiviert!', 'success');
         setIsActionsModalOpen(false);
         setSelectedUser(null);
-        showSnackbar('Benutzer erfolgreich deaktiviert!', 'success');
-        setTimeout(() => loadUsers(), 300);
       } else {
         showSnackbar(response.message || 'Fehler beim Deaktivieren des Benutzers', 'error');
       }
@@ -247,10 +321,14 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       setIsDeleting(userId);
       const response = await userApi.permanentDeleteUser(userId);
       if (response.success) {
+        // Entferne den Benutzer aus der lokalen Liste
+        const updatedUsers = users.filter(user => user._id !== userId);
+        setUsers(updatedUsers);
+        // Update global cache
+        globalUsersCache = updatedUsers;
+        showSnackbar('Benutzer permanent gelöscht!', 'success');
         setIsActionsModalOpen(false);
         setSelectedUser(null);
-        showSnackbar('Benutzer permanent gelöscht!', 'success');
-        setTimeout(() => loadUsers(), 300);
       } else {
         showSnackbar(response.message || 'Fehler beim permanenten Löschen des Benutzers', 'error');
       }
@@ -260,14 +338,22 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     } finally {
       setIsDeleting(null);
     }
-  };const handleToggleUserStatus = async (userId: string, isActive: boolean) => {
+  };  const handleToggleUserStatus = async (userId: string, isActive: boolean) => {
     try {
       const response = await userApi.toggleUserStatus(userId, !isActive);
       if (response.success) {
+        // Aktualisiere den Status in der lokalen Liste
+        const updatedUsers = users.map(user => 
+          user._id === userId 
+            ? { ...user, isActive: !isActive }
+            : user
+        );
+        setUsers(updatedUsers);
+        // Update global cache
+        globalUsersCache = updatedUsers;
+        showSnackbar(`Benutzer erfolgreich ${!isActive ? 'aktiviert' : 'deaktiviert'}!`, 'success');
         setIsActionsModalOpen(false);
         setSelectedUser(null);
-        showSnackbar(`Benutzer erfolgreich ${!isActive ? 'aktiviert' : 'deaktiviert'}!`, 'success');
-        setTimeout(() => loadUsers(), 300);
       } else {
         showSnackbar(response.message || 'Fehler beim Ändern des Benutzerstatus', 'error');
       }
@@ -353,6 +439,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     }
 
     try {
+      setModalPersist(true); // Prevent modal from closing during operation
       const response = await userApi.resetPassword(selectedUser._id, newPassword);
 
       if (response.success) {
@@ -367,6 +454,8 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     } catch (error) {
       console.error('Error resetting password:', error);
       showSnackbar('Fehler beim Zurücksetzen des Passworts', 'error');
+    } finally {
+      setModalPersist(false); // Re-enable modal closing
     }
   };
 
@@ -375,6 +464,25 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     setNewPassword('');
     setConfirmPassword('');
     setIsPasswordResetModalOpen(true);
+  };
+
+  // Direct close handlers for explicit user actions (X button clicks)
+  const forceCloseModal = (modalType: 'create' | 'edit' | 'actions' | 'password') => {
+    console.log(`🚀 Force closing modal: ${modalType}`);
+    switch (modalType) {
+      case 'create':
+        setIsCreateModalOpen(false);
+        break;
+      case 'edit':
+        setIsEditModalOpen(false);
+        break;
+      case 'actions':
+        setIsActionsModalOpen(false);
+        break;
+      case 'password':
+        setIsPasswordResetModalOpen(false);
+        break;
+    }
   };
 
   if (!isAdmin) {
@@ -403,7 +511,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-end">
-        <Button onClick={openCreateModal} className="bg-brand-600 hover:bg-brand-700 text-white">
+        <Button type="button" onClick={openCreateModal} className="bg-brand-600 hover:bg-brand-700 text-white">
           <UserPlus className="h-4 w-4 mr-2" />
           Neuer Benutzer
         </Button>
@@ -489,7 +597,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                 <SelectItem value="active">Aktiv</SelectItem>
                 <SelectItem value="inactive">Inaktiv</SelectItem>
               </SelectContent>
-            </Select>            <Button variant="outline" onClick={() => {
+            </Select>            <Button type="button" variant="outline" onClick={() => {
               console.log('Manueller Refresh gestartet');
               loadUsers();
             }}>
@@ -557,6 +665,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                       }
                     </TableCell>                    <TableCell className="text-right">
                       <Button 
+                        type="button"
                         variant="ghost" 
                         className="h-8 w-8 p-0 hover:bg-gray-100"
                         onClick={() => openActionsModal(user)}
@@ -582,7 +691,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       </Card>      {/* Create User Modal */}
       {isCreateModalOpen && (
         <div
-          onClick={() => setIsCreateModalOpen(false)}
+          onClick={(e) => handleModalClose('create', e)}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 transition-opacity duration-300"
         >
           <div
@@ -599,7 +708,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => setIsCreateModalOpen(false)} 
+                onClick={() => forceCloseModal('create')} 
                 className="rounded-full"
               >
                 <X className="h-4 w-4" />
@@ -608,7 +717,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
             <ScrollArea className="flex-1 overflow-auto pr-3 thin-scrollbar" type="always">
               <div className="px-1 pb-4">
-                <form className="space-y-6">                  {/* Grunddaten */}
+                <form className="space-y-6" onSubmit={e => e.preventDefault()}>                  {/* Grunddaten */}
                   <div className="space-y-4">
                     <h4 className="font-semibold text-slate-700 flex items-center gap-2">
                       <Users className="h-4 w-4 text-brand-600" />
@@ -828,7 +937,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
                       <Button 
                         type="button"
                         variant="outline" 
-                        onClick={() => setIsCreateModalOpen(false)}
+                        onClick={() => forceCloseModal('create')}
                         className="px-6 py-3"
                       >
                         Abbrechen
@@ -851,7 +960,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       )}      {/* Edit User Modal */}
       {isEditModalOpen && (
         <div
-          onClick={() => setIsEditModalOpen(false)}
+          onClick={(e) => handleModalClose('edit', e)}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 transition-opacity duration-300"
         >
           <div
@@ -868,7 +977,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => setIsEditModalOpen(false)} 
+                onClick={() => forceCloseModal('edit')} 
                 className="rounded-full"
               >
                 <X className="h-4 w-4" />
@@ -1109,7 +1218,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       {/* Actions Modal */}
       {isActionsModalOpen && selectedUser && (
         <div
-          onClick={() => setIsActionsModalOpen(false)}
+          onClick={(e) => handleModalClose('actions', e)}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 transition-opacity duration-300"
         >
           <div
@@ -1133,7 +1242,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => setIsActionsModalOpen(false)} 
+                onClick={() => forceCloseModal('actions')} 
                 className="rounded-full"
               >
                 <X className="h-4 w-4" />
@@ -1141,6 +1250,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
             </div>            <div className="space-y-2">
               {/* Bearbeiten Button */}
               <Button
+                type="button"
                 variant="ghost"
                 onClick={() => {
                   setIsActionsModalOpen(false);
@@ -1154,6 +1264,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
               {/* Status Toggle Button */}
               <Button
+                type="button"
                 variant="ghost"
                 onClick={async () => {
                   await handleToggleUserStatus(selectedUser._id, selectedUser.isActive);
@@ -1172,6 +1283,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
               {/* Passwort zurücksetzen Button */}
               <Button
+                type="button"
                 variant="ghost"
                 onClick={() => {
                   setIsActionsModalOpen(false);
@@ -1188,6 +1300,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
               {/* Deaktivieren Button */}
               <Button
+                type="button"
                 variant="ghost"
                 onClick={async () => {
                   await handleDeleteUser(selectedUser._id);
@@ -1204,6 +1317,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
 
               {/* Permanent löschen Button */}
               <Button
+                type="button"
                 variant="ghost"
                 onClick={async () => {
                   await handlePermanentDeleteUser(selectedUser._id);
@@ -1254,7 +1368,7 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
       {/* Passwort zurücksetzen Modal */}
       {isPasswordResetModalOpen && (
         <div
-          onClick={() => setIsPasswordResetModalOpen(false)}
+          onClick={(e) => handleModalClose('password', e)}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 transition-opacity duration-300"
         >
           <div
@@ -1336,4 +1450,19 @@ const UserManagement = ({ currentUser }: UserManagementProps) => {
   );
 };
 
-export default UserManagement;
+// Memoization mit custom comparison function
+export default memo(UserManagement, (prevProps, nextProps) => {
+  // Vergleiche nur die relevanten Eigenschaften des currentUser
+  const prevUser = prevProps.currentUser;
+  const nextUser = nextProps.currentUser;
+  
+  if (!prevUser && !nextUser) return true;
+  if (!prevUser || !nextUser) return false;
+  
+  // Vergleiche nur die für UserManagement relevanten Eigenschaften
+  return (
+    prevUser._id === nextUser._id &&
+    prevUser.role === nextUser.role &&
+    prevUser.isActive === nextUser.isActive
+  );
+});

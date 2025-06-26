@@ -19,7 +19,7 @@ import {
 import { useSnackbar } from '@/components/ui/snackbar';
 
 // Einheitlicher Button-Style
-const buttonStyle = "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600/100 data-[state=on]:shadow-[0_0_0_2px_#be123c] transition-all duration-200 ease-in-out";
+const buttonStyle = "h-12 border-2 border-brand-600/20 data-[state=on]:bg-rose-50 data-[state=on]:text-brand-600 data-[state=on]:border-brand-600 transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:ring-offset-2";
 
 type ModalProps = {
   open: boolean;
@@ -284,7 +284,7 @@ const DigitalizationModal = ({ open, onClose }: ModalProps) => {
                   id="privacy"
                   onCheckedChange={(checked) => setPrivacyAgreed(!!checked)}
                   required
-                  className="h-5 w-5 mt-0.5"
+                  className="h-4 w-4 mt-0.5"
                 />
                 <Label htmlFor="privacy" className="text-sm text-slate-700 cursor-pointer">
                   Ich habe die Datenschutzhinweise gelesen und stimme der Verarbeitung meiner Daten zu.

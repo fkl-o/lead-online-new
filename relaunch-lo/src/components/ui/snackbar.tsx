@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
 
 interface SnackbarContextType {
   showSnackbar: (message: string, type?: 'success' | 'error') => void;
@@ -17,15 +17,18 @@ export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
   const [message, setMessage] = useState('');
   const [type, setType] = useState<'success' | 'error'>('success');
 
-  const showSnackbar = (msg: string, t: 'success' | 'error' = 'success') => {
+  const showSnackbar = useCallback((msg: string, t: 'success' | 'error' = 'success') => {
     setMessage(msg);
     setType(t);
     setOpen(true);
     setTimeout(() => setOpen(false), 3000);
-  };
+  }, []);
+
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({ showSnackbar }), [showSnackbar]);
 
   return (
-    <SnackbarContext.Provider value={{ showSnackbar }}>
+    <SnackbarContext.Provider value={contextValue}>
       {children}
       <div
         className={`fixed bottom-6 left-1/2 z-[9999] px-6 py-3 rounded shadow-lg text-white transition-all duration-300 pointer-events-none select-none

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/accessibility.css";
 
 @layer base {
   :root {
@@ -58,11 +59,77 @@
   }
 }
 
-/* Custom Styles für das premium, moderne Theme aus dem HTML-Prototyp */
+/* ========================================
+   FOCUS STYLES - MARKENKONFORME STYLES
+   ======================================== */
+
+/* Entferne blaue Browser-Focus-Borders überall */
+*:focus {
+  outline: none !important;
+}
+
+*:focus-visible {
+  outline: none !important;
+}
+
+/* Markenkonforme Focus-Styles nur für Inputs */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  border-color: #be123c !important;
+  box-shadow: 0 0 0 2px rgba(190, 18, 60, 0.2) !important;
+}
+
+/* Normale Buttons und Links - KEIN grauer Border */
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Navigation Focus - KEIN grauer Border */
+.main-header nav a:focus,
+.main-header nav a:focus-visible,
+.main-header button:focus,
+.main-header button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* SelectableButton Active States - NUR roter Border, KEIN grauer */
+button[data-state="on"] {
+  background-color: #fdf2f8 !important;
+  color: #be123c !important;
+  border-color: #be123c !important;
+  border-width: 2px !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Checkbox Focus */
+input[type="checkbox"]:focus,
+input[type="checkbox"]:focus-visible,
+[data-slot="checkbox"]:focus-within {
+  outline: none !important;
+  border-color: #be123c !important;
+  box-shadow: 0 0 0 2px rgba(190, 18, 60, 0.2) !important;
+}
+
+/* ========================================
+   THEME STYLES
+   ======================================== */
+
+/* Custom Styles für das premium, moderne Theme */
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f8fafc; /* Neutral 50 */
-  color: #1e293b; /* Neutral 800 */
+  background-color: #f8fafc;
+  color: #1e293b;
 }
 
 .hero-pattern {
@@ -79,6 +146,16 @@ body {
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Fallback für initial load - wenn JS noch nicht geladen ist */
+.reveal:not(.js-loaded) {
+  animation: initial-reveal 0.1s ease forwards;
+}
+
+@keyframes initial-reveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Modal styles */
@@ -115,7 +192,7 @@ body {
   color: #1d4ed8;
 }
 
-/* Brand Colors aus dem HTML-Prototyp */
+/* Brand Colors */
 .bg-brand-600 {
   background-color: #be123c;
 }
@@ -160,56 +237,204 @@ body {
   color: #060b23;
 }
 
-/* Modal transitions */
-.modal {
-  transition: opacity 0.25s ease;
+/* ========================================
+   COMPACT CHECKBOX STYLES
+   ======================================== */
+
+/* Kleine Checkboxen für alle Bereiche außer Cookie-Banner */
+input[type="checkbox"]:not(.cookie-banner input[type="checkbox"]) {
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  transform: scale(0.8) !important;
 }
 
-.modal-content {
-  transition: transform 0.25s ease;
+/* Speziell für Modals und Forms */
+.modal input[type="checkbox"],
+.form input[type="checkbox"],
+form input[type="checkbox"] {
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  transform: scale(0.8) !important;
 }
 
-.reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+/* Login und andere Bereiche */
+#remember-me {
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  transform: scale(0.8) !important;
 }
 
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
+/* Force Radix UI checkboxes to be smaller */
+[data-slot="checkbox"] {
+  width: 10px !important;
+  height: 10px !important;
+  min-width: 10px !important;
+  min-height: 10px !important;
 }
 
-/* Modal styles */
-.modal {
-  transition: opacity 0.25s ease;
-}
-.modal-content {
-  transition: transform 0.25s ease;
+[data-slot="checkbox-indicator"] svg {
+  width: 8px !important;
+  height: 8px !important;
 }
 
-/* Pills/Badges */
-.service-pill {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 9999px;
-  letter-spacing: 0.025em;
-  text-transform: uppercase;
+/* Modal checkboxes should be even smaller */
+.modal-container [data-slot="checkbox"] {
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
 }
 
-.service-pill-brand {
-  background-color: rgba(190, 18, 60, 0.1);
-  color: #9f1239;
+.modal-container [data-slot="checkbox-indicator"] svg {
+  width: 10px !important;
+  height: 10px !important;
 }
 
-.service-pill-green {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: #15803d;
+/* ========================================
+   COOKIE BANNER STYLES
+   ======================================== */
+
+.cookie-banner .text-lg {
+  font-size: 16px !important;
+  line-height: 1.4 !important;
 }
 
-.service-pill-blue {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #1d4ed8;
+.cookie-banner .text-sm {
+  font-size: 13px !important;
+  line-height: 1.3 !important;
+}
+
+.cookie-banner .text-xs {
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+}
+
+.cookie-banner h2 {
+  font-size: 18px !important;
+  margin-bottom: 8px !important;
+  line-height: 1.3 !important;
+}
+
+.cookie-banner h3 {
+  font-size: 13px !important;
+  line-height: 1.3 !important;
+}
+
+.cookie-banner p {
+  margin-bottom: 12px !important;
+}
+
+.cookie-banner .p-4 {
+  padding: 12px !important;
+}
+
+.cookie-banner .p-3 {
+  padding: 10px !important;
+}
+
+.cookie-banner .mb-3 {
+  margin-bottom: 10px !important;
+}
+
+.cookie-banner .mb-2 {
+  margin-bottom: 6px !important;
+}
+
+.cookie-banner .gap-3 {
+  gap: 10px !important;
+}
+
+.cookie-banner .gap-2 {
+  gap: 6px !important;
+}
+
+.cookie-banner button {
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+  line-height: 1.3 !important;
+}
+
+.cookie-banner .w-6 {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.cookie-banner .space-y-2 > * + * {
+  margin-top: 8px !important;
+}
+
+.cookie-banner .space-y-3 > * + * {
+  margin-top: 12px !important;
+}
+
+/* ========================================
+   NAVIGATION STYLES
+   ======================================== */
+
+.main-header nav {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.main-header nav a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+
+.main-header .space-x-6 > * {
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+.transform {
+  will-change: transform;
+}
+
+.transition {
+  will-change: transform, opacity;
+}
+
+.animation-done {
+  will-change: auto;
+}
+
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+img[loading="lazy"] {
+  filter: blur(0.5px);
+  transition: filter 0.3s;
+}
+
+img[loading="lazy"].loaded {
+  filter: none;
 }

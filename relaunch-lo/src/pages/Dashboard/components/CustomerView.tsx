@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Building, Mail, Phone, Globe, Star, Clock, AlertCircle, CheckCircle, Eye, MessageSquare, Target } from 'lucide-react';
+import { Building, Mail, Phone, Globe, Star, Clock, CheckCircle, Eye, MessageSquare, Target } from 'lucide-react';
 
 interface Company {
   name?: string;
@@ -71,41 +70,6 @@ interface CustomerViewProps {
 }
 
 const CustomerView = ({ user, leads, onEditLead }: CustomerViewProps) => {
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'contacted': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'qualified': return 'bg-green-100 text-green-800 border-green-200';
-      case 'proposal': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'negotiation': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'closed-won': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'closed-lost': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'new': return 'Neu';
-      case 'contacted': return 'Kontaktiert';
-      case 'qualified': return 'Qualifiziert';
-      case 'proposal': return 'Angebot erhalten';
-      case 'negotiation': return 'In Verhandlung';
-      case 'closed-won': return 'Angenommen';
-      case 'closed-lost': return 'Abgelehnt';
-      default: return status;
-    }
-  };
-
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case 'high': return <AlertCircle className="h-4 w-4" />;
-      case 'medium': return <Clock className="h-4 w-4" />;
-      case 'low': return <CheckCircle className="h-4 w-4" />;
-      default: return <CheckCircle className="h-4 w-4" />;
-    }
-  };
 
   const getSourceIcon = (source: string) => {
     switch (source.toLowerCase()) {
@@ -232,8 +196,6 @@ const CustomerView = ({ user, leads, onEditLead }: CustomerViewProps) => {
                   <tr className="border-b border-gray-200">
                     <th className="text-left py-4 px-6 font-semibold text-gray-700">Service</th>
                     <th className="text-left py-4 px-6 font-semibold text-gray-700">Kontakt</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">Status</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">Priorität</th>
                     <th className="text-left py-4 px-6 font-semibold text-gray-700">Erstellt</th>
                     <th className="text-left py-4 px-6 font-semibold text-gray-700">Aktionen</th>
                   </tr>
@@ -275,22 +237,6 @@ const CustomerView = ({ user, leads, onEditLead }: CustomerViewProps) => {
                             </p>
                           )}
                         </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <Badge className={`${getStatusColor(lead.status)} border`}>
-                          {getStatusLabel(lead.status)}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-6">
-                        <Badge 
-                          variant={lead.priority === 'high' ? 'destructive' : 
-                                 lead.priority === 'medium' ? 'default' : 'secondary'}
-                          className="flex items-center gap-1 w-fit"
-                        >
-                          {getPriorityIcon(lead.priority)}
-                          {lead.priority === 'high' ? 'Hoch' : 
-                           lead.priority === 'medium' ? 'Mittel' : 'Niedrig'}
-                        </Badge>
                       </td>
                       <td className="py-4 px-6">
                         <div className="text-sm text-gray-600 flex items-center gap-1">

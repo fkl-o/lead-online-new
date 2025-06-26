@@ -10,9 +10,17 @@ export function revealInit() {
         }
       });
     },
-    { threshold: 0.1 }
+    { threshold: 0.05, rootMargin: '50px' } // Erweiterte Einstellungen für bessere Erkennung
   );
 
   // Alle .reveal-Elemente beobachten
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  const revealElements = document.querySelectorAll('.reveal');
+  revealElements.forEach(el => {
+    // Elemente, die bereits im Viewport sind, sofort als sichtbar markieren
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      el.classList.add('visible');
+    }
+    observer.observe(el);
+  });
 }

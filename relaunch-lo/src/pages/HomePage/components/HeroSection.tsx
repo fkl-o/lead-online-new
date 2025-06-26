@@ -32,10 +32,10 @@ const HeroSection = () => {
                 behavior: 'smooth',
               })
             }
-            className="bg-brand-600 hover:bg-brand-700 text-white font-bold text-lg px-8 py-4 md:px-10 md:py-5 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg shadow-brand-600/20"
+            className="bg-brand-600 hover:bg-brand-700 text-white font-bold text-base sm:text-lg px-6 py-3 sm:px-8 sm:py-4 md:px-10 md:py-5 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg shadow-brand-600/20 w-full sm:w-auto"
           >
             Unsere Leistungen entdecken
-            <ArrowDown className="inline-block ml-2 w-5 h-5" />
+            <ArrowDown className="inline-block ml-2 w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>

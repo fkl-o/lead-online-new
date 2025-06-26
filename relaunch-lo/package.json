@@ -9,9 +9,14 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build --mode production",
+    "build:clean": "npm run clean && npm run build",
+    "start": "python3 -m http.server $PORT --directory dist || python -m http.server $PORT --directory dist || npx serve -s dist -p $PORT",
+    "preview": "python3 -m http.server $PORT --directory dist || python -m http.server $PORT --directory dist || npx serve -s dist -p $PORT",
     "lint": "eslint .",
-    "preview": "vite preview --host 0.0.0.0 --port $PORT"
+    "clean:windows": "if exist dist rmdir /s /q dist && if exist node_modules\\.vite rmdir /s /q node_modules\\.vite",
+    "clean:unix": "rm -rf dist node_modules/.vite",
+    "clean": "npm run clean:windows || npm run clean:unix"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -74,6 +79,7 @@
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react-swc": "^3.9.0",
     "eslint": "^9.25.0",
+    "serve": "^14.2.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",

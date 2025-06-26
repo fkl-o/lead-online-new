@@ -6,30 +6,32 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 
-// Performance optimization
-import { registerSW } from './lib/serviceWorker';
-
-// Static imports for core components
+// Static imports for core components (critical path)
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
-import HomePage from './pages/HomePage';
-import WebentwicklungLayout from './pages/Webentwicklung/WebentwicklungLayout';
-import MarketingAutomationLayout from './pages/MarketingAutomation/MarketingAutomationLayout';
-import DigitalizationLayout from './pages/Digitalization/DigitalizationLayout';
-import LoginPage from './pages/LoginPage';
-import ContactPage from './pages/ContactPage';
-import TestPage from './pages/TestPage';
+import ErrorBoundary from './components/ErrorBoundary';
+
+// Lazy load ALL components to avoid bundling issues
+const HomePage = lazy(() => import('./pages/HomePage'));
+const WebentwicklungLayout = lazy(() => import('./pages/Webentwicklung/WebentwicklungLayout'));
+const MarketingAutomationLayout = lazy(() => import('./pages/MarketingAutomation/MarketingAutomationLayout'));
+const DigitalizationLayout = lazy(() => import('./pages/Digitalization/DigitalizationLayout'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const TestPage = lazy(() => import('./pages/TestPage'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const Imprint = lazy(() => import('./pages/Imprint'));
+
+// UI Provider
 import { SnackbarProvider } from './components/ui/snackbar';
 
-// Lazy load dashboard components to improve initial page load
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-
-// Loading component for Suspense fallback
+// Optimized loading component with better UX
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50">
     <div className="text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-      <p className="mt-4 text-gray-600">Dashboard wird geladen...</p>
+      <p className="mt-4 text-gray-600">Seite wird geladen...</p>
     </div>
   </div>
 );
@@ -42,7 +44,11 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <HomePage />
+          </Suspense>
+        ),
       },
       {
         path: "webentwicklung",
@@ -58,6 +64,22 @@ const router = createBrowserRouter([
       },      {
         path: "contact",
         element: <ContactPage />,
+      },
+      {
+        path: "datenschutz",
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <PrivacyPolicy />
+          </Suspense>
+        ),
+      },
+      {
+        path: "impressum",
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <Imprint />
+          </Suspense>
+        ),
       }
     ],
   },
@@ -85,15 +107,41 @@ if (!rootElement) {
   throw new Error("Root-Element mit der ID 'root' wurde im DOM nicht gefunden.");
 }
 
+// Remove initial loading spinner
+const initialLoading = document.getElementById('initial-loading');
+if (initialLoading) {
+  initialLoading.remove();
+}
+
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <SnackbarProvider>
-      <HelmetProvider>
-        <RouterProvider router={router} />
-      </HelmetProvider>
-    </SnackbarProvider>
+    <ErrorBoundary>
+      <SnackbarProvider>
+        <HelmetProvider>
+          <RouterProvider router={router} />
+        </HelmetProvider>
+      </SnackbarProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 
-// Register service worker for performance optimization
-registerSW();
+// Service Worker komplett deaktiviert für statisches Hosting
+// Nur Cleanup für bestehende Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => {
+      registration.unregister();
+      console.log('�️ Existing Service Worker unregistered');
+    });
+  });
+  
+  // Caches manuell löschen
+  if ('caches' in window) {
+    caches.keys().then((cacheNames) => {
+      cacheNames.forEach((cacheName) => {
+        caches.delete(cacheName);
+        console.log('🗑️ Cache deleted:', cacheName);
+      });
+    });
+  }
+}

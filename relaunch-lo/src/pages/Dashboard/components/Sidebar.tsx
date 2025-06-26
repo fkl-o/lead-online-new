@@ -65,18 +65,13 @@ const fullMenuItems: MenuSection[] = [
     items: [
       { id: 'overview', label: 'Übersicht', icon: Home },
       { id: 'leads', label: 'Lead-Management', icon: Target, badge: 'active' },
-      { id: 'companies', label: 'Unternehmen', icon: Building2 },
-    ]
-  },
-  {
-    section: 'Benutzerverwaltung',
-    items: [
       { id: 'users', label: 'Benutzer', icon: Users, badge: null, adminOnly: true },
     ]
   },
   {
     section: 'In Entwicklung',
     items: [
+      { id: 'companies', label: 'Unternehmen', icon: Building2, badge: null, disabled: true },
       { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, badge: null, disabled: true },
       { id: 'activities', label: 'Aktivitäten', icon: Activity, badge: null, disabled: true },
       { id: 'calendar', label: 'Kalender', icon: Calendar, badge: null, disabled: true },

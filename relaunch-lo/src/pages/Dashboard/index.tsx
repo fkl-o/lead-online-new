@@ -13,7 +13,6 @@ const StatsCards = lazy(() => import('./components/StatsCards'));
 const LeadsTable = lazy(() => import('./components/LeadsTable'));
 const LeadEditModal = lazy(() => import('./components/LeadEditModal'));
 const UserManagement = lazy(() => import('./components/UserManagement'));
-const CompanyManagement = lazy(() => import('./components/CompanyManagement'));
 const AccountModal = lazy(() => import('./components/AccountModal'));
 const CustomerView = lazy(() => import('./components/CustomerView'));
 
@@ -258,7 +257,14 @@ const Dashboard = () => {
     // Reload user data from localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const newUserData = JSON.parse(storedUser);
+      // Only update if the user data actually changed to prevent unnecessary re-renders
+      setUser(prevUser => {
+        if (!prevUser || JSON.stringify(prevUser) !== JSON.stringify(newUserData)) {
+          return newUserData;
+        }
+        return prevUser;
+      });
     }
   };
 
@@ -366,9 +372,19 @@ const Dashboard = () => {
         );
       case 'companies':
         return (
-          <ComponentWrapper>
-            <CompanyManagement currentUser={user} />
-          </ComponentWrapper>
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="mb-4">
+                <div className="mx-auto h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center">
+                  <span className="text-gray-400 text-lg">🚧</span>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Feature in Entwicklung</h3>
+              <p className="text-gray-600 max-w-sm">
+                Diese Funktion wird derzeit entwickelt und wird in einer zukünftigen Version verfügbar sein.
+              </p>
+            </div>
+          </div>
         );
       default:
         // Für alle anderen Views (die disabled sind)

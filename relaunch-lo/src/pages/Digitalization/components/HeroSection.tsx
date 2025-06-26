@@ -41,7 +41,7 @@ const HeroSection = ({ onOpenModal }: HeroSectionProps) => {
           <Button
             onClick={handleDigitalizationModalOpen}
             size="lg"
-            className="text-white bg-brand-600 hover:bg-brand-700 cursor-pointer transform transition-transform hover:scale-105 text-xl px-12 py-6"
+            className="text-white bg-brand-600 hover:bg-brand-700 cursor-pointer transform transition-transform hover:scale-105 text-base sm:text-lg md:text-xl px-6 sm:px-8 md:px-12 py-4 sm:py-5 md:py-6 w-full sm:w-auto"
           >
             Kostenloses Gespräch vereinbaren
           </Button>
