@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent } from '../ui/card';
 import { SecurityUtils } from '../../lib/security';
 import { Send, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -133,216 +133,270 @@ export const ContactForm: React.FC = () => {
   };
 
   return (
-    <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">
-          Kostenloses Beratungsgespräch
-        </CardTitle>
-        <p className="text-gray-600 text-center">
-          Lassen Sie uns über Ihr Projekt sprechen
+    <div className="w-full max-w-3xl mx-auto">
+      {/* Header Section */}
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-secondary-600 mb-4">
+          Kontakt aufnehmen
+        </h2>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Sprechen Sie mit uns über Ihr digitales Vorhaben. Wir freuen uns auf Ihre Nachricht und melden uns schnellstmöglich bei Ihnen.
         </p>
-      </CardHeader>
-      
-      <CardContent>
-        <form onSubmit={handleSubmit} noValidate className="space-y-6">
-          {/* Status Messages */}
-          {submitStatus === 'success' && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3" role="alert">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <p className="text-green-700">{submitMessage}</p>
-            </div>
-          )}
-          
-          {submitStatus === 'error' && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3" role="alert">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <p className="text-red-700">{submitMessage}</p>
-            </div>
-          )}
+      </div>
 
-          {errors.general && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg" role="alert">
-              <p className="text-red-700">{errors.general}</p>
-            </div>
-          )}
-
-          {/* Name Field */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-              Name *
-            </label>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              required
-              value={formData.name}
-              onChange={handleInputChange}
-              className={errors.name ? 'border-red-500' : ''}
-              aria-invalid={errors.name ? 'true' : 'false'}
-              aria-describedby={errors.name ? 'name-error' : undefined}
-              placeholder="Ihr vollständiger Name"
-            />
-            {errors.name && (
-              <p id="name-error" className="mt-1 text-sm text-red-600" role="alert">
-                {errors.name}
-              </p>
-            )}
-          </div>
-
-          {/* Email Field */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              E-Mail-Adresse *
-            </label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              required
-              value={formData.email}
-              onChange={handleInputChange}
-              className={errors.email ? 'border-red-500' : ''}
-              aria-invalid={errors.email ? 'true' : 'false'}
-              aria-describedby={errors.email ? 'email-error' : undefined}
-              placeholder="ihre@email.de"
-            />
-            {errors.email && (
-              <p id="email-error" className="mt-1 text-sm text-red-600" role="alert">
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          {/* Phone Field */}
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-              Telefonnummer (optional)
-            </label>
-            <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className={errors.phone ? 'border-red-500' : ''}
-              aria-invalid={errors.phone ? 'true' : 'false'}
-              aria-describedby={errors.phone ? 'phone-error' : undefined}
-              placeholder="+49 123 456789"
-            />
-            {errors.phone && (
-              <p id="phone-error" className="mt-1 text-sm text-red-600" role="alert">
-                {errors.phone}
-              </p>
-            )}
-          </div>
-
-          {/* Company Field */}
-          <div>
-            <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-              Unternehmen (optional)
-            </label>
-            <Input
-              id="company"
-              name="company"
-              type="text"
-              value={formData.company}
-              onChange={handleInputChange}
-              className={errors.company ? 'border-red-500' : ''}
-              aria-invalid={errors.company ? 'true' : 'false'}
-              aria-describedby={errors.company ? 'company-error' : undefined}
-              placeholder="Ihr Unternehmen"
-            />
-            {errors.company && (
-              <p id="company-error" className="mt-1 text-sm text-red-600" role="alert">
-                {errors.company}
-              </p>
-            )}
-          </div>
-
-          {/* Message Field */}
-          <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-              Nachricht *
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              required
-              rows={5}
-              value={formData.message}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.message ? 'border-red-500' : 'border-gray-300'
-              }`}
-              aria-invalid={errors.message ? 'true' : 'false'}
-              aria-describedby={errors.message ? 'message-error' : undefined}
-              placeholder="Beschreiben Sie kurz Ihr Projekt oder Ihre Anfrage..."
-            />
-            {errors.message && (
-              <p id="message-error" className="mt-1 text-sm text-red-600" role="alert">
-                {errors.message}
-              </p>
-            )}
-          </div>
-
-          {/* Consent Checkbox */}
-          <div className="flex items-start gap-2">
-            <input
-              id="consent"
-              name="consent"
-              type="checkbox"
-              checked={formData.consent}
-              onChange={handleInputChange}
-              className={`mt-1 w-3 h-3 text-blue-600 bg-gray-100 border rounded focus:ring-blue-500 focus:ring-1 ${
-                errors.consent ? 'border-red-500' : 'border-gray-300'
-              }`}
-              aria-invalid={errors.consent ? 'true' : 'false'}
-              aria-describedby={errors.consent ? 'consent-error' : 'consent-description'}
-            />
+      {/* Status Messages */}
+      {submitStatus === 'success' && (
+        <div className="mb-8 p-6 bg-green-50 border-l-4 border-green-400 rounded-lg" role="alert">
+          <div className="flex items-center">
+            <CheckCircle className="w-6 h-6 text-green-600 mr-3" />
             <div>
-              <label htmlFor="consent" className="text-sm text-gray-700">
-                Ich stimme der Verarbeitung meiner Daten gemäß der{' '}
-                <a href="/datenschutz" className="text-blue-600 underline hover:text-blue-800">
-                  Datenschutzerklärung
-                </a>{' '}
-                zu. *
+              <h4 className="text-green-800 font-semibold">Nachricht erfolgreich gesendet!</h4>
+              <p className="text-green-700 mt-1">{submitMessage}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {submitStatus === 'error' && (
+        <div className="mb-8 p-6 bg-red-50 border-l-4 border-red-400 rounded-lg" role="alert">
+          <div className="flex items-center">
+            <AlertCircle className="w-6 h-6 text-red-600 mr-3" />
+            <div>
+              <h4 className="text-red-800 font-semibold">Fehler beim Senden</h4>
+              <p className="text-red-700 mt-1">{submitMessage}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {errors.general && (
+        <div className="mb-8 p-6 bg-red-50 border-l-4 border-red-400 rounded-lg" role="alert">
+          <p className="text-red-700 font-medium">{errors.general}</p>
+        </div>
+      )}
+
+      {/* Form Card */}
+      <Card className="shadow-xl border-0 overflow-hidden">
+        <CardContent className="p-8">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
+            {/* Name and Email Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="name" className="block text-sm font-semibold text-secondary-600">
+                  Vollständiger Name *
+                </label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={`h-12 border-2 transition-all duration-200 ${
+                    errors.name 
+                      ? 'border-red-400 focus:border-red-500' 
+                      : 'border-gray-200 focus:border-brand-600 hover:border-gray-300'
+                  } focus:ring-2 focus:ring-brand-600/20`}
+                  aria-invalid={errors.name ? 'true' : 'false'}
+                  aria-describedby={errors.name ? 'name-error' : undefined}
+                  placeholder="Max Mustermann"
+                />
+                {errors.name && (
+                  <p id="name-error" className="text-sm text-red-600 flex items-center gap-1" role="alert">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-semibold text-secondary-600">
+                  E-Mail-Adresse *
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={`h-12 border-2 transition-all duration-200 ${
+                    errors.email 
+                      ? 'border-red-400 focus:border-red-500' 
+                      : 'border-gray-200 focus:border-brand-600 hover:border-gray-300'
+                  } focus:ring-2 focus:ring-brand-600/20`}
+                  aria-invalid={errors.email ? 'true' : 'false'}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
+                  placeholder="max@mustermann.de"
+                />
+                {errors.email && (
+                  <p id="email-error" className="text-sm text-red-600 flex items-center gap-1" role="alert">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Phone and Company Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="phone" className="block text-sm font-semibold text-secondary-600">
+                  Telefonnummer
+                  <span className="text-gray-400 font-normal ml-1">(optional)</span>
+                </label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className={`h-12 border-2 transition-all duration-200 ${
+                    errors.phone 
+                      ? 'border-red-400 focus:border-red-500' 
+                      : 'border-gray-200 focus:border-brand-600 hover:border-gray-300'
+                  } focus:ring-2 focus:ring-brand-600/20`}
+                  aria-invalid={errors.phone ? 'true' : 'false'}
+                  aria-describedby={errors.phone ? 'phone-error' : undefined}
+                  placeholder="+49 123 456789"
+                />
+                {errors.phone && (
+                  <p id="phone-error" className="text-sm text-red-600 flex items-center gap-1" role="alert">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.phone}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="company" className="block text-sm font-semibold text-secondary-600">
+                  Unternehmen
+                  <span className="text-gray-400 font-normal ml-1">(optional)</span>
+                </label>
+                <Input
+                  id="company"
+                  name="company"
+                  type="text"
+                  value={formData.company}
+                  onChange={handleInputChange}
+                  className={`h-12 border-2 transition-all duration-200 ${
+                    errors.company 
+                      ? 'border-red-400 focus:border-red-500' 
+                      : 'border-gray-200 focus:border-brand-600 hover:border-gray-300'
+                  } focus:ring-2 focus:ring-brand-600/20`}
+                  aria-invalid={errors.company ? 'true' : 'false'}
+                  aria-describedby={errors.company ? 'company-error' : undefined}
+                  placeholder="Mustermann GmbH"
+                />
+                {errors.company && (
+                  <p id="company-error" className="text-sm text-red-600 flex items-center gap-1" role="alert">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.company}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Message Field */}
+            <div className="space-y-2">
+              <label htmlFor="message" className="block text-sm font-semibold text-secondary-600">
+                Ihre Nachricht *
               </label>
-              <p id="consent-description" className="text-xs text-gray-500 mt-1">
-                Ihre Daten werden nur zur Bearbeitung Ihrer Anfrage verwendet.
-              </p>
-              {errors.consent && (
-                <p id="consent-error" className="mt-1 text-sm text-red-600" role="alert">
-                  {errors.consent}
+              <textarea
+                id="message"
+                name="message"
+                required
+                rows={6}
+                value={formData.message}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border-2 rounded-lg shadow-sm transition-all duration-200 resize-none ${
+                  errors.message 
+                    ? 'border-red-400 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-brand-600 hover:border-gray-300'
+                } focus:outline-none focus:ring-2 focus:ring-brand-600/20`}
+                aria-invalid={errors.message ? 'true' : 'false'}
+                aria-describedby={errors.message ? 'message-error' : undefined}
+                placeholder="Beschreiben Sie uns Ihr Projekt oder Ihre Anfrage. Je detaillierter Ihre Beschreibung, desto besser können wir Ihnen helfen..."
+              />
+              {errors.message && (
+                <p id="message-error" className="text-sm text-red-600 flex items-center gap-1" role="alert">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.message}
                 </p>
               )}
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={isSubmitting || submitStatus === 'success'}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Wird gesendet...
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4 mr-2" />
-                Nachricht senden
-              </>
-            )}
-          </Button>
-          
-          <p className="text-xs text-gray-500 text-center">
-            * Pflichtfelder
-          </p>
-        </form>
-      </CardContent>
-    </Card>
+            {/* Consent Checkbox */}
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <div className="flex items-start gap-3">
+                <input
+                  id="consent"
+                  name="consent"
+                  type="checkbox"
+                  checked={formData.consent}
+                  onChange={handleInputChange}
+                  className={`mt-1 w-4 h-4 text-brand-600 bg-white border-2 rounded focus:ring-brand-600/20 focus:ring-2 transition-all ${
+                    errors.consent ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  aria-invalid={errors.consent ? 'true' : 'false'}
+                  aria-describedby={errors.consent ? 'consent-error' : 'consent-description'}
+                />
+                <div className="flex-1">
+                  <label htmlFor="consent" className="text-sm text-secondary-600 leading-relaxed">
+                    Ich stimme der Verarbeitung meiner Daten gemäß der{' '}
+                    <a href="/datenschutz" className="text-brand-600 underline hover:text-brand-700 font-medium">
+                      Datenschutzerklärung
+                    </a>{' '}
+                    zu. *
+                  </label>
+                  <p id="consent-description" className="text-xs text-gray-500 mt-2 leading-relaxed">
+                    Ihre Daten werden ausschließlich zur Bearbeitung Ihrer Anfrage verwendet und nicht an Dritte weitergegeben.
+                  </p>
+                  {errors.consent && (
+                    <p id="consent-error" className="mt-2 text-sm text-red-600 flex items-center gap-1" role="alert">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.consent}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-4">
+              <Button
+                type="submit"
+                disabled={isSubmitting || submitStatus === 'success'}
+                className="w-full h-14 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-lg rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                    Nachricht wird gesendet...
+                  </>
+                ) : submitStatus === 'success' ? (
+                  <>
+                    <CheckCircle className="w-5 h-5 mr-3" />
+                    Erfolgreich gesendet
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5 mr-3" />
+                    Nachricht senden
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Footer Info */}
+      <div className="mt-8 text-center">
+        <p className="text-sm text-gray-500">
+          * Pflichtfelder • Wir antworten in der Regel innerhalb von 24 Stunden
+        </p>
+      </div>
+    </div>
   );
 };

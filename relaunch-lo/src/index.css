@@ -310,11 +310,12 @@ form input[type="checkbox"] {
   z-index: 10000;
   display: flex;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-end;
   padding: 1rem;
   opacity: 0;
   transform: translateY(100%);
   transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
 }
 
 .cookie-banner-modern.visible {
@@ -329,6 +330,7 @@ form input[type="checkbox"] {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.02);
+  pointer-events: none;
 }
 
 /* Professional Card Design */
@@ -341,6 +343,7 @@ form input[type="checkbox"] {
   max-width: 520px;
   width: 100%;
   overflow: hidden;
+  pointer-events: auto;
 }
 
 /* Subtle Brand Accent */
@@ -356,7 +359,7 @@ form input[type="checkbox"] {
 
 /* Content Container */
 .cookie-banner-content-modern {
-  padding: 1.25rem;
+  padding: 0.75rem 1rem;
   position: relative;
   z-index: 1;
 }
@@ -366,7 +369,7 @@ form input[type="checkbox"] {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  margin-bottom: 0.875rem;
+  margin-bottom: 0.375rem;
 }
 
 .cookie-banner-icon-container {
@@ -408,7 +411,7 @@ form input[type="checkbox"] {
 .cookie-banner-actions-modern {
   display: flex;
   gap: 0.5rem;
-  margin: 0.75rem 0 0 0;
+  margin: 0.375rem 0 0 0;
   flex-wrap: wrap;
 }
 
@@ -652,7 +655,7 @@ form input[type="checkbox"] {
 
 .cookie-banner-all-cta {
   flex: 1;
-  background: #22c55e;
+  background: linear-gradient(135deg, #be123c, #dc2626);
   color: white;
   border: none;
   padding: 0.75rem 1rem;
@@ -664,11 +667,12 @@ form input[type="checkbox"] {
   justify-content: center;
   gap: 0.5rem;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(190, 18, 60, 0.2);
 }
 
 .cookie-banner-all-cta:hover {
-  background: #16a34a;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(190, 18, 60, 0.25);
 }
 
 .cookie-banner-minimal-cta {
@@ -689,6 +693,7 @@ form input[type="checkbox"] {
 @media (max-width: 640px) {
   .cookie-banner-modern {
     padding: 0.5rem;
+    justify-content: center;
   }
   
   .cookie-banner-content-modern {
