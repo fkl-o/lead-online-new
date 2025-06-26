@@ -161,3 +161,11 @@ if (import.meta.env.PROD) {
 if (import.meta.env.DEV) {
   import('./lib/pwa-test-utils');
 }
+
+// Import Inter font from @fontsource package
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+import "@fontsource/inter/800.css";
+import "@fontsource/inter/900.css";
