@@ -5,7 +5,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import CookieBanner from "./CookieBanner";
 import { PWAInstallPrompt } from "./PWAInstallPrompt";
-import { PWAUpdatePrompt, PWAOfflineReady } from "./PWAUpdatePrompt";
+import { PWAUpdatePrompt } from "./PWAUpdatePrompt";
 import { MobilePWANotification } from "./MobilePWANotification";
 import { Helmet } from "react-helmet-async";
 
@@ -56,7 +56,6 @@ const Layout = () => {
       {/* PWA Components */}
       <PWAInstallPrompt />
       <PWAUpdatePrompt />
-      <PWAOfflineReady />
       
       {/* Mobile PWA Installation Notification */}
       <MobilePWANotification />

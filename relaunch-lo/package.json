@@ -10,8 +10,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:pwa": "tsc -b && vite build && npm run pwa:test",
     "lint": "eslint .",
-    "preview": "vite preview --host 0.0.0.0 --port $PORT"
+    "preview": "vite preview --host 0.0.0.0 --port $PORT",
+    "pwa:test": "echo 'PWA build completed. Test with: npm run preview'",
+    "pwa:audit": "lighthouse http://localhost:3000 --view --chrome-flags='--headless'"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -92,6 +95,8 @@
     "serve": "^14.2.4",
     "tw-animate-css": "^1.3.4",
     "typescript": "~5.8.3",
-    "typescript-eslint": "^8.30.1"
+    "typescript-eslint": "^8.30.1",
+    "vite-plugin-pwa": "^1.0.0",
+    "workbox-window": "^7.3.0"
   }
 }

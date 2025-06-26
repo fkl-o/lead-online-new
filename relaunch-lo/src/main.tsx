@@ -6,6 +6,10 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 
+// PWA initialization
+import './lib/pwa-registration';
+import './lib/offline-storage';
+
 // Static imports for core components (critical path)
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
