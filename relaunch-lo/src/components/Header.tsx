@@ -6,7 +6,8 @@ import MobileMenu from "./MobileMenu";
 import { authApi } from "@/lib/api";
 
 const Header = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
   // Check authentication status
   useEffect(() => {

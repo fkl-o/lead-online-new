@@ -378,8 +378,8 @@ form input[type="checkbox"] {
    ======================================== */
 
 .main-header nav {
-  display: flex !important;
-  align-items: center !important;
+  /* Removed display: flex !important to allow Tailwind responsive classes */
+  align-items: center;
 }
 
 .main-header nav a {
