@@ -9,24 +9,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:production": "vite build",
-    "build:render": "bash render-build.sh",
-    "build:fallback": "vite build",
-    "build:pwa": "powershell -ExecutionPolicy Bypass -File ./build-pwa.ps1",
-    "build:clean": "yarn clean && yarn build",
-    "start": "npx serve -s dist -p $PORT",
-    "preview": "yarn build && vite preview",
-    "preview:serve": "npx serve -s dist -p $PORT",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:ci": "jest --ci --coverage --watchAll=false",
-    "test:debug": "jest --detectOpenHandles --forceExit",
-    "clean:windows": "if exist dist rmdir /s /q dist && if exist node_modules\\.vite rmdir /s /q node_modules\\.vite",
-    "clean:unix": "rm -rf dist node_modules/.vite",
-    "clean": "yarn clean:windows || yarn clean:unix"
+    "preview": "vite preview --host 0.0.0.0 --port $PORT"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
