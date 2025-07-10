@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Lead Online",
-  "short_name": "Lead Online",
+  "name": "lead.online",
+  "short_name": "lead.online",
   "description": "Professionelle Lead-Generierung und Marketing-Automation für nachhaltiges Unternehmenswachstum",
   "start_url": "/",
   "display": "standalone",

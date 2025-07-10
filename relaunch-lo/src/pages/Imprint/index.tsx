@@ -6,9 +6,9 @@ const Imprint: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-16" role="main">
       <SEOHead
-        title="Impressum | Rechtliche Angaben & Kontaktdaten | Lead Online"
-        description="Impressum und rechtliche Informationen zu Lead Online - Ihrer Digitalagentur für Webentwicklung, Marketing Automation und Digitalisierung."
-        keywords={['Impressum', 'Rechtliche Angaben', 'Kontaktdaten', 'Lead Online', 'Deutschland']}
+        title="Impressum | Rechtliche Angaben & Kontaktdaten | lead.online"
+        description="Impressum und rechtliche Informationen zu lead.online - Ihrer Digitalagentur für Webentwicklung, Marketing Automation und Digitalisierung."
+        keywords={['Impressum', 'Rechtliche Angaben', 'Kontaktdaten', 'lead.online', 'Deutschland']}
       />
       
       <div className="max-w-4xl mx-auto px-6">

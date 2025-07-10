@@ -17,7 +17,7 @@ const DigitalizationPage = ({ onOpenModal }: DigitalizationPageProps) => {
   return (
     <>
       <SEOHead
-        title="Digitalisierung | 15-Min. Check & Sofort-Maßnahmen | Lead Online"
+        title="Digitalisierung | 15-Min. Check & Sofort-Maßnahmen | lead.online"
         description="Digitalisieren Sie Ihre Geschäftsprozesse effizient. 15-Minuten Digitalisierungs-Check mit Ist-Analyse und 3 konkreten Sofort-Maßnahmen. Kostenlos!"
         keywords={['Digitalisierung', 'Prozessoptimierung', 'Workflow Automation', 'Business Intelligence', 'Digital Transformation', 'Deutschland']}
         structuredData={digitalizationSchema}

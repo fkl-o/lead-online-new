@@ -17,7 +17,7 @@ const MarketingAutomationPage = ({ onOpenModal }: MarketingAutomationPageProps) 
   return (
     <>
       <SEOHead
-        title="Marketing Automation | ROI-Kalkulator & Lead-Generierung | Lead Online"
+        title="Marketing Automation | ROI-Kalkulator & Lead-Generierung | lead.online"
         description="Steigern Sie Ihren Marketing-ROI mit professioneller Marketing Automation. Interaktiver Kalkulator mit 5-Monats-Prognose. Jetzt kostenlos berechnen!"
         keywords={['Marketing Automation', 'Lead Generation', 'ROI Kalkulator', 'Email Marketing', 'CRM', 'Conversion Optimierung', 'Deutschland']}
         structuredData={marketingAutomationSchema}

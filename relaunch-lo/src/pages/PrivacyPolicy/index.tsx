@@ -6,9 +6,9 @@ const PrivacyPolicy: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-16" role="main">
       <SEOHead
-        title="Datenschutzerklärung | DSGVO-konforme Datenverarbeitung | Lead Online"
-        description="Datenschutzerklärung von Lead Online: Erfahren Sie, wie wir Ihre persönlichen Daten DSGVO-konform sammeln, verwenden und schützen."
-        keywords={['Datenschutzerklärung', 'DSGVO', 'Datenschutz', 'Datenverarbeitung', 'Lead Online', 'Deutschland']}
+        title="Datenschutzerklärung | DSGVO-konforme Datenverarbeitung | lead.online"
+        description="Datenschutzerklärung von lead.online: Erfahren Sie, wie wir Ihre persönlichen Daten DSGVO-konform sammeln, verwenden und schützen."
+        keywords={['Datenschutzerklärung', 'DSGVO', 'Datenschutz', 'Datenverarbeitung', 'lead.online', 'Deutschland']}
       />
       
       <div className="max-w-4xl mx-auto px-6">
@@ -31,7 +31,7 @@ const PrivacyPolicy: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900">1. Überblick</h2>
               </div>
               <p className="text-gray-700 mb-4">
-                Lead Online nimmt den Schutz Ihrer persönlichen Daten sehr ernst. Diese Datenschutzerklärung 
+                lead.online nimmt den Schutz Ihrer persönlichen Daten sehr ernst. Diese Datenschutzerklärung 
                 informiert Sie darüber, wie wir Ihre Daten sammeln, verwenden und schützen, wenn Sie unsere 
                 Website besuchen oder unsere Dienste nutzen.
               </p>

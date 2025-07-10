@@ -17,14 +17,14 @@ const HomePage = () => {
   // SEO Structured Data
   const organizationSchema = createOrganizationSchema();
   const webPageSchema = createWebPageSchema(
-    "Lead Online - Ihre Digitalagentur für Wachstum",
+    "lead.online - Ihre Digitalagentur für Wachstum",
     "Als Ihr Partner für Webentwicklung, Marketing Automation und Digitalisierung schaffen wir nachhaltige Wettbewerbsvorteile und messbare Erfolge."
   );
 
   return (
     <>
       <SEOHead
-        title="Lead Online | Digitalagentur für Webentwicklung, Marketing & Digitalisierung"
+        title="lead.online | Digitalagentur für Webentwicklung, Marketing & Digitalisierung"
         description="Ihre Digitalagentur für nachhaltiges Wachstum: Professionelle Webentwicklung, Marketing Automation und Digitalisierung. Kostenlose Beratung & schnelle Umsetzung!"
         keywords={['Digitalagentur', 'Webentwicklung', 'Marketing Automation', 'Digitalisierung', 'Lead Generation', 'Deutschland', 'Wachstum']}
         structuredData={[organizationSchema, webPageSchema]}

@@ -22,7 +22,7 @@ const DashboardHeader = ({ user, onLogout }: DashboardHeaderProps) => {
           </div>
           <div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Lead Online Dashboard
+              lead.online Dashboard
             </h1>
             {user && <p className="text-gray-600 text-sm">Willkommen zurück, {user.name}!</p>}
           </div>
