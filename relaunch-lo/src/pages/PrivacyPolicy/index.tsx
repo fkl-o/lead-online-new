@@ -1,12 +1,5 @@
 import React from 'react';
-import { Shield, Eye, Lock,                <p className="font-semibold">lead.online GmbH</p>
-                <p>Baierbrunner Str. 3</p>
-                <p>81379 München</p>
-                <p>Deutschland</p>
-                <p className="mt-2">
-                  <strong>E-Mail:</strong> datenschutz@lead.online<br />
-                  <strong>Telefon:</strong> +49 123 456 789
-                </p>FileText, AlertTriangle } from 'lucide-react';
+import { Shield, Eye, Lock, FileText, AlertTriangle, Users } from 'lucide-react';
 import { SEOHead } from '../../components/SEOHead';
 
 const PrivacyPolicy: React.FC = () => {
