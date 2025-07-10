@@ -24,7 +24,7 @@ const WebentwicklungLayout = () => {
   return (
     <>
       <SEOHead
-        title="Webentwicklung | LeadGen Pro"
+        title="Webentwicklung | Lead Online"
         description="Professionelle Webentwicklung und digitale Lösungen für Ihr Unternehmen. Moderne, responsive Websites und Webanwendungen."
         keywords={['Webentwicklung', 'Website erstellen', 'React', 'Frontend', 'Backend', 'Deutschland']}
         structuredData={webDevelopmentSchema}

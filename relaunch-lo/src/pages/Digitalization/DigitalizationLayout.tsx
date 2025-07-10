@@ -19,7 +19,7 @@ const DigitalizationLayout = () => {
   return (
     <>
       <Helmet>
-        <title>Digitalisierung | LeadGen Pro</title>
+        <title>Digitalisierung | Lead Online</title>
         <meta
           name="description"
           content="Ganzheitliche Digitalisierungslösungen für Ihr Unternehmen: Prozessoptimierung, IT-Sicherheit & Cloud-Integration."

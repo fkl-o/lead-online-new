@@ -142,7 +142,11 @@ const Sidebar = ({ currentView, onViewChange, user, className, onCollapseChange,
                 <Target className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="font-bold text-gray-900">LeadGen Pro</h2>
+                <img 
+                  src="/images/lead-online-logo.svg" 
+                  alt="Lead Online Logo" 
+                  className="h-6 w-auto"
+                />
                 <p className="text-xs text-gray-500">Dashboard</p>
               </div>
             </div>
@@ -274,7 +278,7 @@ const Sidebar = ({ currentView, onViewChange, user, className, onCollapseChange,
           {!collapsed && (
             <div className="text-xs text-gray-500 text-center pt-3">
               <p>Version 2.0.0</p>
-              <p>© 2024 LeadGen Pro</p>
+              <p>© 2024 lead.online GmbH</p>
             </div>
           )}
         </div>

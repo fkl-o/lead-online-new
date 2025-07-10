@@ -17,7 +17,7 @@ const WebentwicklungPage = ({ onOpenModal }: WebentwicklungPageProps) => {
   return (
     <>
       <SEOHead
-        title="Webentwicklung | Moderne Websites & Webanwendungen | LeadGen Pro"
+        title="Webentwicklung | Moderne Websites & Webanwendungen | Lead Online"
         description="Professionelle Webentwicklung für Ihr Unternehmen. Responsive Design, schnelle Ladezeiten und SEO-optimiert. Kostenloses Design in 72h!"
         keywords={['Webentwicklung', 'Website erstellen', 'Responsive Design', 'React', 'WordPress', 'E-Commerce', 'Deutschland']}
         structuredData={webDevelopmentSchema}

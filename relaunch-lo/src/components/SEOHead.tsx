@@ -21,7 +21,7 @@ export const SEOHead: React.FC<SEOProps> = ({
   structuredData,
   noindex = false
 }) => {
-  const fullTitle = title.includes('LeadGen Pro') ? title : `${title} | LeadGen Pro`;
+  const fullTitle = title.includes('lead.online') ? title : `${title} | lead.online`;
   const currentUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '');
 
   return (
@@ -44,7 +44,7 @@ export const SEOHead: React.FC<SEOProps> = ({
       <meta property="og:type" content={ogType} />
       <meta property="og:url" content={currentUrl} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:site_name" content="LeadGen Pro" />
+      <meta property="og:site_name" content="lead.online" />
       <meta property="og:locale" content="de_DE" />
       
       {/* Twitter Card */}
@@ -77,10 +77,10 @@ export const SEOHead: React.FC<SEOProps> = ({
 export const createOrganizationSchema = () => ({
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "LeadGen Pro",
+  "name": "lead.online GmbH",
   "description": "Ihre Digitalagentur für Webentwicklung, Marketing Automation und Digitalisierung",
-  "url": "https://leadgen-pro.de",
-  "logo": "https://leadgen-pro.de/logo.png",
+  "url": "https://lead.online",
+  "logo": "https://lead.online/images/lead-online-logo.svg",
   "contactPoint": {
     "@type": "ContactPoint",
     "telephone": "+49-XXX-XXXXXXX",
@@ -89,12 +89,14 @@ export const createOrganizationSchema = () => ({
   },
   "address": {
     "@type": "PostalAddress",
-    "addressCountry": "DE",
-    "addressLocality": "Deutschland"
+    "streetAddress": "Baierbrunner Str. 3",
+    "postalCode": "81379",
+    "addressLocality": "München",
+    "addressCountry": "DE"
   },
   "sameAs": [
-    "https://www.linkedin.com/company/leadgen-pro",
-    "https://www.xing.com/companies/leadgen-pro"
+    "https://www.linkedin.com/company/lead-online",
+    "https://www.xing.com/companies/lead-online"
   ]
 });
 
@@ -105,7 +107,7 @@ export const createServiceSchema = (serviceName: string, description: string) =>
   "description": description,
   "provider": {
     "@type": "Organization",
-    "name": "LeadGen Pro"
+    "name": "lead.online GmbH"
   },
   "areaServed": {
     "@type": "Country",
@@ -120,7 +122,7 @@ export const createWebPageSchema = (pageName: string, description: string) => ({
   "description": description,
   "isPartOf": {
     "@type": "WebSite",
-    "name": "LeadGen Pro",
-    "url": "https://leadgen-pro.de"
+    "name": "lead.online",
+    "url": "https://lead.online"
   }
 });

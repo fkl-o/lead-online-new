@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "LeadGenPro",
-  "short_name": "LeadGenPro",
+  "name": "Lead Online",
+  "short_name": "Lead Online",
   "description": "Professionelle Lead-Generierung und Marketing-Automation für nachhaltiges Unternehmenswachstum",
   "start_url": "/",
   "display": "standalone",
@@ -78,7 +78,7 @@
     {
       "name": "Kontakt",
       "short_name": "Kontakt",
-      "description": "Direkter Kontakt zu LeadGenPro",
+      "description": "Direkter Kontakt zu lead.online",
       "url": "/contact",
       "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     },

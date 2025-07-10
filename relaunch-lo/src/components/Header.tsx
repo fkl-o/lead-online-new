@@ -51,23 +51,29 @@ const Header = () => {
   return (
     <>
       <header className="main-header fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-6 py-4 flex items-center">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-brand-600">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
-            </svg>
-            <span className="font-bold text-xl text-gray-900">LeadGen Pro</span>
-          </Link>          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <div className="flex-1">
+            <Link to="/" className="flex items-center space-x-3 w-fit">
+              <img 
+                src="/images/lead-online-logo.svg" 
+                alt="lead.online Logo" 
+                style={{ height: '48px', width: 'auto' }}
+                className="w-auto"
+              />
+            </Link>
+          </div>
+          
+          {/* Desktop Navigation - Zentriert */}
+          <nav className="hidden md:flex items-center space-x-6 flex-1 justify-center">
             <Link to="/webentwicklung" className="text-slate-600 hover:text-slate-900 transition-colors">Webentwicklung</Link>
             <Link to="/marketing-automation" className="text-slate-600 hover:text-slate-900 transition-colors">Marketing Automation</Link>
             <Link to="/digitalization" className="text-slate-600 hover:text-slate-900 transition-colors">Digitalisierung</Link>
-          </nav>          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center space-x-4">
+          </nav>
+          
+          {/* Desktop CTA */}
+          <div className="hidden md:flex items-center space-x-4 flex-1 justify-end">
             <Button asChild className="bg-brand-600 hover:bg-brand-700 text-white font-semibold flex items-center space-x-2">
               <Link to="/contact" onClick={handleContactClick}>
                 <Mail className="w-4 h-4" />

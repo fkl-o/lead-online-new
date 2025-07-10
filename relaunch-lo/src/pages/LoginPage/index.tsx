@@ -100,8 +100,8 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50" role="main">
       <SEOHead
-        title={`${isForgotPassword ? 'Passwort vergessen' : 'Anmelden'} | LeadGen Pro`}
-        description="Melden Sie sich in Ihrem LeadGen Pro Konto an"
+        title={`${isForgotPassword ? 'Passwort vergessen' : 'Anmelden'} | Lead Online`}
+        description="Melden Sie sich in Ihrem Lead Online Konto an"
         noindex={true}
       />
       

@@ -6,9 +6,9 @@ const Imprint: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-16" role="main">
       <SEOHead
-        title="Impressum | Rechtliche Angaben & Kontaktdaten | LeadGen Pro"
-        description="Impressum und rechtliche Informationen zu LeadGen Pro - Ihrer Digitalagentur für Webentwicklung, Marketing Automation und Digitalisierung."
-        keywords={['Impressum', 'Rechtliche Angaben', 'Kontaktdaten', 'LeadGen Pro', 'Deutschland']}
+        title="Impressum | Rechtliche Angaben & Kontaktdaten | Lead Online"
+        description="Impressum und rechtliche Informationen zu Lead Online - Ihrer Digitalagentur für Webentwicklung, Marketing Automation und Digitalisierung."
+        keywords={['Impressum', 'Rechtliche Angaben', 'Kontaktdaten', 'Lead Online', 'Deutschland']}
       />
       
       <div className="max-w-4xl mx-auto px-6">
@@ -27,11 +27,11 @@ const Imprint: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900">Angaben gemäß § 5 TMG</h2>
               </div>
               <div className="bg-gray-50 p-6 rounded-lg">
-                <p className="text-lg font-semibold text-gray-900 mb-2">LeadGen Pro GmbH</p>
+                <p className="text-lg font-semibold text-gray-900 mb-2">lead.online GmbH</p>
                 <div className="space-y-2 text-gray-700">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-brand-600" aria-hidden="true" />
-                    <span>Musterstraße 123, 12345 Musterstadt, Deutschland</span>
+                    <span>Baierbrunner Str. 3, 81379 München, Deutschland</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="w-4 h-4 text-brand-600" aria-hidden="true" />

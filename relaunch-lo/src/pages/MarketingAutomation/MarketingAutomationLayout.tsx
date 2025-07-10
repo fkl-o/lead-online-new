@@ -19,7 +19,7 @@ const MarketingAutomationLayout = () => {
   return (
     <>
       <Helmet>
-        <title>Marketing Automation | LeadGen Pro</title>
+        <title>Marketing Automation | Lead Online</title>
         <meta
           name="description"
           content="Automatisieren Sie Ihre Marketingprozesse und steigern Sie Ihre Effizienz mit intelligenter Marketing Automation."

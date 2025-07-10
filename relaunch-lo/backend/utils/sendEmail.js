@@ -17,7 +17,7 @@ export const sendEmail = async (options) => {
   const transporter = createTransporter();
 
   const message = {
-    from: `${process.env.EMAIL_FROM_NAME || 'LeadGen Pro'} <${process.env.EMAIL_FROM}>`,
+    from: `${process.env.EMAIL_FROM_NAME || 'lead.online'} <${process.env.EMAIL_FROM}>`,
     to: options.email,
     subject: options.subject,
     text: options.message,
@@ -31,16 +31,16 @@ export const sendEmail = async (options) => {
 
 // Template for welcome email
 export const sendWelcomeEmail = async (user) => {
-  const subject = 'Willkommen bei LeadGen Pro';
+  const subject = 'Willkommen bei lead.online';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #be123c;">Willkommen bei LeadGen Pro!</h1>
+      <h1 style="color: #be123c;">Willkommen bei lead.online!</h1>
       <p>Hallo ${user.name},</p>
       <p>vielen Dank für Ihr Interesse an unseren Dienstleistungen. Wir haben Ihr Konto erfolgreich erstellt.</p>
       <p>Sie können sich jetzt in Ihr Dashboard einloggen und Ihre Leads verwalten.</p>
       <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>
       <br>
-      <p>Beste Grüße,<br>Ihr LeadGen Pro Team</p>
+      <p>Beste Grüße,<br>Ihr lead.online Team</p>
     </div>
   `;
 
@@ -48,7 +48,7 @@ export const sendWelcomeEmail = async (user) => {
     email: user.email,
     subject,
     html,
-    message: `Willkommen bei LeadGen Pro, ${user.name}!`
+    message: `Willkommen bei lead.online, ${user.name}!`
   });
 };
 

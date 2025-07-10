@@ -18,15 +18,15 @@ const ContactPage = () => {
 	const cardsRef = useScrollReveal<HTMLDivElement>({ delay: 200 });
 
 	const contactSchema = createServiceSchema(
-		"Kontakt zu LeadGen Pro",
+		"Kontakt zu Lead Online",
 		"Kontaktieren Sie uns für professionelle Webentwicklung, Marketing Automation und Digitalisierung"
 	);
 
 	return (
 		<>
 			<SEOHead
-				title="Kontakt | Kostenlose Beratung für Webentwicklung & Marketing | LeadGen Pro"
-				description="Kontaktieren Sie LeadGen Pro für professionelle Webentwicklung, Marketing Automation und Digitalisierung. Kostenlose Beratung und unverbindliches Angebot!"
+				title="Kontakt | Kostenlose Beratung für Webentwicklung & Marketing | Lead Online"
+				description="Kontaktieren Sie Lead Online für professionelle Webentwicklung, Marketing Automation und Digitalisierung. Kostenlose Beratung und unverbindliches Angebot!"
 				keywords={['Kontakt', 'Beratung', 'Webentwicklung', 'Marketing Automation', 'Digitalisierung', 'Deutschland']}
 				structuredData={contactSchema}
 			/>
